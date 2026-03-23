@@ -546,7 +546,17 @@ function hideLoading() {
   if(ls) ls.classList.add('hidden');
 }
 
+// Timeout de sécurité — si Supabase ne répond pas en 3 secondes, afficher la connexion
+var _authResolved = false;
+setTimeout(function(){
+  if(!_authResolved){
+    hideLoading();
+    showAuth();
+  }
+}, 3000);
+
 sb.auth.onAuthStateChange(async (event, session) => {
+  _authResolved = true;
   if (session && session.user) {
     currentUser = session.user;
     await loadProfile();
@@ -845,35 +855,67 @@ async function inviteAvocat(){
   var name=document.getElementById('inv-name').value.trim(),email=document.getElementById('inv-email').value.trim(),taux=parseFloat(document.getElementById('inv-taux').value)||200;
   if(!name||!email){toast('Nom et courriel requis.','err');return;}
   var btn=document.getElementById('inviteBtn');
-  if(btn){btn.textContent='Envoi en cours…';btn.disabled=true;}
+  if(btn){btn.textContent='Enregistrement…';btn.disabled=true;}
   try {
-    // Step 1: Invite user via Supabase Auth (sends email automatically)
-    var {data,error} = await sb.auth.admin.inviteUserByEmail(email, {
-      data: { full_name: name }
-    });
-    if(error) throw error;
-    var userId = data.user.id;
-    // Step 2: Create profile with role and taux
-    var {error:e2} = await sb.from('profiles').upsert({
-      id: userId,
-      full_name: name,
-      email: email,
-      role: 'avocat',
-      taux_defaut: taux
-    });
-    if(e2) throw e2;
-    toast('✓ Invitation envoyée à '+email, 'ok');
+    // Check if user already exists in profiles
+    var {data:existing} = await sb.from('profiles').select('id').eq('email',email).single();
+    if(existing){
+      // Update existing profile
+      await sb.from('profiles').update({full_name:name, taux_defaut:taux}).eq('email',email);
+      toast('✓ Profil de '+name+' mis à jour.','ok');
+    } else {
+      // Pre-create profile — will be linked when user accepts invite
+      // First send invite via Supabase dashboard, then this saves the profile info
+      var {data:authUser} = await sb.auth.admin.getUserByEmail(email).catch(()=>({data:null}));
+      if(authUser && authUser.user) {
+        await sb.from('profiles').upsert({id:authUser.user.id, full_name:name, email:email, role:'avocat', taux_defaut:taux});
+        toast('✓ Profil créé pour '+name+'.','ok');
+      } else {
+        // Store pending profile info — will be applied on first login via trigger
+        // For now: show instructions with the info pre-filled
+        showInviteInstructions(name, email, taux);
+        if(btn){btn.textContent='Inviter';btn.disabled=false;}
+        return;
+      }
+    }
     document.getElementById('inv-name').value='';
     document.getElementById('inv-email').value='';
     document.getElementById('inv-taux').value='';
-    await loadData();
-    renderAdminPage();
+    await loadData(); renderAdminPage();
   } catch(err) {
-    // Fallback: create profile and tell admin to invite manually
-    toast('Courriel d\'invitation envoyé manuellement requis — vérifiez Supabase Auth.','warn');
-    console.error('inviteAvocat error:', err);
+    showInviteInstructions(name, email, taux);
+    console.error('inviteAvocat:', err);
   }
   if(btn){btn.textContent='Inviter';btn.disabled=false;}
+}
+
+function showInviteInstructions(name, email, taux){
+  // Show a clear modal with step-by-step instructions
+  var msg = document.getElementById('inviteMsg');
+  if(msg){
+    msg.style.display='block';
+    msg.innerHTML = '<div style="background:var(--info-dim);border:1px solid rgba(41,128,185,.25);border-radius:var(--r);padding:1rem 1.2rem;margin-top:.8rem">'
+      + '<div style="font-size:.84rem;font-weight:600;color:#5090d0;margin-bottom:.5rem">📧 Étapes pour inviter '+name+'</div>'
+      + '<div style="font-size:.8rem;color:var(--text2);line-height:1.7">'
+      + '1. <a href="https://supabase.com/dashboard" target="_blank" style="color:var(--gold)">Supabase</a> → Authentication → Users → <strong>Invite user</strong><br>'
+      + '2. Courriel : <strong>'+email+'</strong><br>'
+      + '3. Cliquez <strong>Send invitation</strong><br>'
+      + '4. '+name+' recevra un lien pour créer son mot de passe<br>'
+      + '5. À sa première connexion, son profil sera créé automatiquement'
+      + '</div></div>';
+    // Also pre-create profile pending via SQL approach
+    savePendingProfile(name, email, taux);
+  }
+}
+
+async function savePendingProfile(name, email, taux){
+  // Save to a pending_profiles table or use profiles with a placeholder ID
+  try {
+    await sb.from('profiles').upsert({
+      id: '00000000-0000-0000-0000-'+ email.replace(/[^a-z0-9]/g,'').substring(0,12).padEnd(12,'0'),
+      full_name: name, email: email, role: 'avocat', taux_defaut: taux
+    });
+  } catch(e){ console.log('pending profile note:', e); }
 }
 
 // ══════════════════════════════════════════════
@@ -1893,3 +1935,4 @@ function buildExistingClients(){
 </script>
 </body>
 </html>
+fprof
