@@ -1250,15 +1250,18 @@ function renderFinancier(){
 }
 function setFinTab(t,btn){finTab=t;renderFinancier();}
 function toggleRow(label, sub, key) {
-    var checked = _conflitSettings[key] !== undefined ? _conflitSettings[key] : true;
-    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:.42rem 0;border-bottom:1px solid var(--border);gap:.8rem">'
-      + '<div><div style="font-size:.81rem;color:var(--text2)">'+label+'</div>'+(sub?'<div style="font-size:.68rem;color:var(--text3);margin-top:1px">'+sub+'</div>':'')+'</div>'
-      + '<label style="position:relative;width:34px;height:19px;flex-shrink:0;cursor:pointer">'
-        + '<input type="checkbox" '+(checked?'checked':'')+' data-key="'+key+'" onchange="toggleConflitSetting(this)" style="opacity:0;width:0;height:0;position:absolute">'
-        + '<div style="position:absolute;inset:0;background:'+(checked?'var(--sage)':'var(--surface3)')+';border-radius:9px;border:1px solid '+(checked?'var(--sage)':'var(--border2)')+';transition:background .2s" id="tr-bg-'+key+'"></div>'
-        + '<div style="position:absolute;top:3px;'+(checked?'left:17px':'left:3px')+';width:11px;height:11px;border-radius:50%;background:'+(checked?'white':'var(--text3)')+';transition:left .2s;pointer-events:none" id="tr-knob-'+key+'"></div>'
-      + '</label></div>';
-  }
+  var checked = _conflitSettings[key] !== undefined ? _conflitSettings[key] : true;
+  var bg   = checked ? 'var(--sage)'    : 'var(--surface3)';
+  var bd   = checked ? 'var(--sage)'    : 'var(--border2)';
+  var knob = checked ? '17px'           : '3px';
+  var kbg  = checked ? 'white'          : 'var(--text3)';
+  return '<div style="display:flex;align-items:center;justify-content:space-between;padding:.42rem 0;border-bottom:1px solid var(--border);gap:.8rem">'
+    + '<div><div style="font-size:.81rem;color:var(--text2)">'+label+'</div>'+(sub ? '<div style="font-size:.68rem;color:var(--text3);margin-top:1px">'+sub+'</div>' : '')+'</div>'
+    + '<div onclick="toggleSetting(\''+key+'\')" style="width:34px;height:19px;border-radius:9px;background:'+bg+';border:1px solid '+bd+';position:relative;cursor:pointer;transition:background .2s;flex-shrink:0">'
+      + '<div style="position:absolute;top:3px;left:'+knob+';width:11px;height:11px;border-radius:50%;background:'+kbg+';transition:left .2s;pointer-events:none"></div>'
+    + '</div>'
+    + '</div>';
+}
 
 function renderNotifs(){
   var myNotifs = NOTIFS;
@@ -1781,20 +1784,13 @@ function addPartyAccueil(){
 function removePartyAccueil(i){ _accueilData.parties.splice(i,1); renderAccueil(); }
 function setConflitDecision(v){ _accueilData.conflitDecision=v; renderAccueil(); }
 
-function toggleConflitSetting(el) {
-  if (!el) return;
-  var key = el.getAttribute('data-key');
-  if (!key) return;
-  _conflitSettings[key] = el.checked;
-  toast('Paramètre mis à jour', 'ok');
-  // Re-render the active parametres section
+function toggleSetting(key) {
+  _conflitSettings[key] = !_conflitSettings[key];
+  toast(_conflitSettings[key] ? 'Activé' : 'Désactivé', 'ok');
   var pPage = document.getElementById('page-notifications');
   var cPage = document.getElementById('page-conflits');
-  if (pPage && pPage.classList.contains('active')) { renderNotifs(); return; }
-  if (cPage && cPage.classList.contains('active')) { 
-    _conflitTab = 'parametres';
-    renderConflits(); 
-  }
+  if (pPage && pPage.classList.contains('active')) { renderNotifs(); }
+  else if (cPage && cPage.classList.contains('active')) { _conflitTab='parametres'; renderConflits(); }
 }
 
 function renderConflits(){
