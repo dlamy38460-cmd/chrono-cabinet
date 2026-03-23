@@ -962,7 +962,45 @@ function toggleTheme(){
   try { localStorage.setItem('chrono-theme', isLight ? 'light' : 'dark'); } catch(e){}
 }
 function renderFinancier(){
-  var myDos=isAdmin?DOSSIERS_FIN:DOSSIERS_FIN.filter(d=>d.avocat===(typeof allProfiles!=='undefined'?allProfiles:[]).find(a=>a.id===currentUser?.id)?.name);
+  // Build financial data from real Supabase entries
+  var allEntries = typeof entries!=='undefined' ? entries : [];
+  var allProfs = typeof allProfiles!=='undefined' ? allProfiles : [];
+  
+  // Group entries by dossier
+  var dossierMap = {};
+  allEntries.forEach(function(e) {
+    if(!dossierMap[e.dossier]) {
+      var prof = allProfs.find(function(p){ return p.id===e.user_id; });
+      dossierMap[e.dossier] = {
+        dossier: e.dossier,
+        client: e.dossier, // Use dossier as client name until we have client table
+        avocat: prof ? (prof.full_name||prof.email) : 'Inconnu',
+        avocat_id: e.user_id,
+        heuresTotal: 0,
+        honorairesTotal: 0,
+        honorairesBudget: 10000, // Default budget
+        facture: 0,
+        statut: 'actif',
+        moisData: Array(12).fill(0),
+      };
+    }
+    dossierMap[e.dossier].heuresTotal += e.minutes/60;
+    dossierMap[e.dossier].honorairesTotal += parseFloat(e.montant||0);
+    // Map to month index (0-11)
+    if(e.date) {
+      var mo = new Date(e.date+'T12:00:00').getMonth();
+      dossierMap[e.dossier].moisData[mo] += parseFloat(e.montant||0);
+    }
+  });
+  
+  var realDos = Object.values(dossierMap);
+  var myDos = isAdminView() ? realDos : realDos.filter(function(d){ return d.avocat_id===currentUser.id; });
+  if(!myDos.length) {
+    document.getElementById('page-financier').innerHTML='<div class="empty" style="padding:4rem">Aucune entrée de temps enregistrée pour l\'instant.</div>';
+    return;
+  }
+  var DOSSIERS_FIN = myDos; // Use real data
+  var myDos=isAdminView()?DOSSIERS_FIN:DOSSIERS_FIN.filter(function(d){return d.avocat_id===currentUser.id;});
   var totH=myDos.reduce((s,d)=>s+d.heuresTotal,0);
   var totAmt=myDos.reduce((s,d)=>s+d.honorairesTotal,0);
   var totFact=myDos.reduce((s,d)=>s+d.facture,0);
@@ -1015,7 +1053,7 @@ function renderFinancier(){
     mainContent=`<div class="card card-accent" style="overflow-x:auto"><div class="chart-title">Rentabilité par dossier</div><table class="rent-table"><thead><tr><th>Dossier</th><th>Client</th>${isAdmin?'<th>Avocat</th>':''}<th class="right">Heures</th><th class="right">Honoraires</th><th class="right">Non facturé</th><th>Rentabilité</th><th>Statut</th></tr></thead><tbody>${tableRows}</tbody></table></div>`;
   } else if(finTab==='avocat'){
     var avRows=(typeof allProfiles!=='undefined'?allProfiles:[]).map(av=>{
-      var avD=DOSSIERS_FIN.filter(d=>d.avocat===av.name);
+      var avD=DOSSIERS_FIN.filter(function(d){return d.avocat_id===av.id;});
       if(!isAdmin&&av.id!==currentUser?.id)return'';
       var avH=avD.reduce((s,d)=>s+d.heuresTotal,0),avAmt=avD.reduce((s,d)=>s+d.honorairesTotal,0),avF=avD.reduce((s,d)=>s+d.facture,0);
       var txH=avH>0?avAmt/avH:0;
@@ -1042,55 +1080,62 @@ function renderFinancier(){
 }
 function setFinTab(t,btn){finTab=t;renderFinancier();}
 function renderNotifs(){
-  var myNotifs=isAdmin?NOTIFS:NOTIFS.filter(n=>!n.meta||n.meta.includes((typeof allProfiles!=='undefined'?allProfiles:[]).find(a=>a.id===currentUser?.id)?.name));
+  var myNotifs=NOTIFS;
   var filtered=notifFilter==='all'?myNotifs:notifFilter==='unread'?myNotifs.filter(n=>n.unread):myNotifs.filter(n=>n.type===notifFilter);
-  var iconBg={urgent:'ni-urgent',warn:'ni-warn',info:'ni-info',ok:'ni-ok',gold:'ni-gold'};
-  var feed=filtered.map(n=>`<div class="notif-item ${n.unread?'unread':''}">
-    <div class="notif-icon ${iconBg[n.type]||'ni-info'}" style="font-size:1rem">${n.icon}</div>
-    <div class="notif-body">
-      <div class="notif-title">${n.title}</div>
-      <div style="font-size:.8rem;color:var(--text2);margin-top:.15rem;line-height:1.4">${n.body}</div>
-      <div class="notif-meta">${n.meta.map(m=>`<span>${m}</span>`).join('')}</div>
-      <div class="notif-time">${n.time}</div>
-      ${n.action?`<div class="notif-action"><button class="nbtn-sm" onclick="toast('Action : ${n.action}','ok')">${n.action} →</button></div>`:''}
-    </div>
-  </div>`).join('')||'<div class="empty">Aucune notification.</div>';
+  var unread=myNotifs.filter(n=>n.unread).length;
+
+  var typeColors={urgent:'var(--urgent-dim)',warn:'var(--warning-dim)',info:'var(--info-dim)',ok:'var(--sage-dim)'};
+  var typeBorders={urgent:'rgba(192,57,43,.3)',warn:'rgba(230,126,34,.25)',info:'rgba(41,128,185,.2)',ok:'rgba(74,122,68,.25)'};
+  var typeIconBg={urgent:'var(--urgent-dim)',warn:'var(--warning-dim)',info:'var(--info-dim)',ok:'var(--sage-dim)'};
+
+  var filterHTML=['all','unread','urgent','info','ok'].map(f=>{
+    var labels={all:'Toutes ('+myNotifs.length+')',unread:'Non lues ('+unread+')',urgent:'🔴 Urgentes',info:'💡 Info',ok:'✓ Système'};
+    return `<div onclick="setNF('${f}',this)" style="padding:.27rem .7rem;border:1px solid ${notifFilter===f?'var(--gold)':'var(--border2)'};border-radius:20px;font-size:.71rem;background:${notifFilter===f?'var(--gold-dim)':'var(--surface2)'};color:${notifFilter===f?'var(--gold)':'var(--text3)'};cursor:pointer;transition:all .2s">${labels[f]}</div>`;
+  }).join('');
+
+  var feedHTML=filtered.map(n=>`
+    <div style="background:var(--surface);border:1px solid ${n.unread?'var(--gold)':'var(--border)'};border-radius:var(--r);padding:.9rem 1.1rem;display:flex;align-items:flex-start;gap:.9rem;margin-bottom:.6rem;position:relative;${n.unread?'border-left:3px solid var(--gold)':''}">
+      <div style="width:34px;height:34px;border-radius:50%;background:${typeIconBg[n.type]||'var(--surface2)'};display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0">${n.icon}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:.84rem;font-weight:500;color:var(--text);margin-bottom:.2rem">${n.title}</div>
+        <div style="font-size:.79rem;color:var(--text2);line-height:1.45;margin-bottom:.25rem">${n.body}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--text3);display:flex;flex-wrap:wrap;gap:.3rem .6rem;margin-bottom:.2rem">${n.meta.map(m=>`<span>${m}</span>`).join('')}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.63rem;color:var(--text3)">${n.time}</div>
+        ${n.action?`<div style="margin-top:.5rem"><button onclick="toast('Action : ${n.action}','ok')" style="padding:.28rem .7rem;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);color:var(--text2);font-family:'Outfit',sans-serif;font-size:.72rem;cursor:pointer">${n.action} →</button></div>`:''}
+      </div>
+      ${n.unread?`<div style="position:absolute;top:.8rem;right:.8rem;width:7px;height:7px;border-radius:50%;background:var(--gold)"></div>`:''}
+    </div>`).join('')||'<div style="text-align:center;padding:2rem;color:var(--text3);font-style:italic">Aucune notification.</div>';
 
   // Settings panel
-  var settingsHtml=`<div class="settings-panel">
-    <div class="sp-head">⚙️ Paramètres des alertes</div>
-    <div class="sp-section">
-      <div class="sp-section-title">Échéances judiciaires</div>
-      ${[{l:'Rappel 30 jours avant',s:'30j avant',on:true},{l:'Rappel 7 jours avant',s:'1 sem avant',on:true},{l:'Rappel 48h avant',s:'48h avant',on:true},{l:'Rappel le jour même',s:'Jour J',on:true}].map((t,i)=>`<div class="toggle-row"><div class="toggle-label">${t.l}<div class="toggle-sub">${t.s}</div></div><label class="toggle"><input type="checkbox" ${t.on?'checked':''} onchange="toast('Paramètre mis à jour','ok')"><div class="toggle-track"></div><div class="toggle-knob"></div></label></div>`).join('')}
-    </div>
-    <div class="sp-section">
-      <div class="sp-section-title">Saisie de temps</div>
-      ${[{l:'Rappel si aucune saisie depuis 3 jours',on:true},{l:'Alerte entrée non facturée > 7 jours',on:true},{l:'Résumé hebdomadaire (lundi 8h)',on:false}].map((t,i)=>`<div class="toggle-row"><div class="toggle-label">${t.l}</div><label class="toggle"><input type="checkbox" ${t.on?'checked':''} onchange="toast('Paramètre mis à jour','ok')"><div class="toggle-track"></div><div class="toggle-knob"></div></label></div>`).join('')}
-    </div>
-    <div class="sp-section">
-      <div class="sp-section-title">Canal de livraison</div>
-      ${[{l:'Notification dans l\'app',on:true},{l:'Courriel',on:true},{l:'SMS (Twilio)',on:false}].map((t,i)=>`<div class="toggle-row"><div class="toggle-label">${t.l}</div><label class="toggle"><input type="checkbox" ${t.on?'checked':''} onchange="toast('Canal mis à jour','ok')"><div class="toggle-track"></div><div class="toggle-knob"></div></label></div>`).join('')}
-      <div class="sp-input-row" style="margin-top:.7rem"><div style="font-family:'JetBrains Mono',monospace;font-size:.59rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:.35rem">Numéro SMS</div><input type="text" placeholder="+1 418 555-0000"><div class="sp-hint">Format international requis</div></div>
-      <div class="sp-input-row" style="margin-top:.6rem"><div style="font-family:'JetBrains Mono',monospace;font-size:.59rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:.35rem">Courriel de notification</div><input type="email" placeholder="vaillancourt@lamy-avocats.ca" value="vaillancourt@lamy-avocats.ca"></div>
-    </div>
-    <button class="btn-save-settings" onclick="toast('✓ Paramètres sauvegardés','ok')">Sauvegarder les paramètres</button>
+  var settingsHTML=`<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+    <div style="padding:1rem 1.2rem;border-bottom:1px solid var(--border);font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:500;color:var(--text)">⚙️ Paramètres des alertes</div>
+    ${[
+      {title:'Échéances judiciaires',items:['Rappel J-7','Rappel J-2','Rappel Jour J']},
+      {title:'Saisie de temps',items:['Aucune saisie depuis 3 jours','Entrée non facturée > 7 jours','Résumé hebdomadaire (lundi)']},
+      {title:'Canal de livraison',items:['Notification dans l\'app','Courriel']},
+    ].map(section=>`
+      <div style="padding:.8rem 1.2rem;border-bottom:1px solid var(--border)">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--text3);letter-spacing:.15em;text-transform:uppercase;margin-bottom:.6rem">${section.title}</div>
+        ${section.items.map(item=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:.38rem 0;border-bottom:1px solid var(--border)">
+          <div style="font-size:.8rem;color:var(--text2)">${item}</div>
+          <label style="position:relative;width:34px;height:19px;flex-shrink:0;cursor:pointer">
+            <input type="checkbox" checked onchange="toast('Paramètre mis à jour','ok')" style="opacity:0;width:0;height:0;position:absolute">
+            <div style="position:absolute;inset:0;background:var(--sage);border-radius:9px;border:1px solid var(--sage)"></div>
+            <div style="position:absolute;top:3px;left:17px;width:11px;height:11px;border-radius:50%;background:white;transition:left .2s"></div>
+          </label>
+        </div>`).join('')}
+      </div>`).join('')}
+    <button onclick="toast('✓ Paramètres sauvegardés','ok')" style="display:flex;align-items:center;justify-content:center;padding:.7rem;background:var(--gold);color:var(--bg);border:none;border-radius:var(--r);font-family:'Outfit',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;width:calc(100% - 2.4rem);margin:1rem 1.2rem">Sauvegarder</button>
   </div>`;
 
-  var unreadCount=myNotifs.filter(n=>n.unread).length;
   document.getElementById('page-notifications').innerHTML=`
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.6rem">
-      <div class="notif-filters">
-        <div class="nf ${notifFilter==='all'?'active':''}" onclick="setNF('all',this)">Toutes (${myNotifs.length})</div>
-        <div class="nf ${notifFilter==='unread'?'active':''}" onclick="setNF('unread',this)">Non lues (${unreadCount})</div>
-        <div class="nf ${notifFilter==='urgent'?'active':''}" onclick="setNF('urgent',this)">🔴 Urgentes</div>
-        <div class="nf ${notifFilter==='info'?'active':''}" onclick="setNF('info',this)">💡 Info</div>
-        <div class="nf ${notifFilter==='ok'?'active':''}" onclick="setNF('ok',this)">✓ Système</div>
-      </div>
-      <button class="nbtn-sm" onclick="toast('Toutes marquées comme lues','ok')">Tout marquer lu</button>
+      <div style="display:flex;gap:.4rem;flex-wrap:wrap">${filterHTML}</div>
+      <button onclick="toast('Toutes marquées comme lues','ok')" style="padding:.32rem .8rem;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);color:var(--text2);font-family:'Outfit',sans-serif;font-size:.75rem;cursor:pointer">Tout marquer lu</button>
     </div>
-    <div class="notif-layout">
-      <div class="notif-feed">${feed}</div>
-      ${settingsHtml}
+    <div style="display:grid;grid-template-columns:1fr 300px;gap:1.2rem;align-items:start">
+      <div>${feedHTML}</div>
+      ${settingsHTML}
     </div>`;
 }
 function setNF(f,btn){notifFilter=f;renderNotifs();}
@@ -1153,9 +1198,22 @@ window.saveNote=function(){
   toast('✓ Note sauvegardée — '+window._activeDos,'ok');
 }
 function renderAccueil(){
+  // Charger les données si pas encore fait
+  if(typeof allProfiles==='undefined'||!allProfiles.length){
+    loadData().then(function(){
+      buildExistingClients();
+      if(!_accueilData.dossierNum) _accueilData.dossierNum=genDossierNum();
+      if(!_accueilData.avocatResp && currentProfile) _accueilData.avocatResp=currentProfile.full_name||'';
+      _accueilStep = _accueilStep || 1;
+      document.getElementById('page-accueil').innerHTML = buildAccueilHTML();
+      bindAccueilEvents();
+    });
+    document.getElementById('page-accueil').innerHTML = '<div style="text-align:center;padding:3rem;color:var(--text3)">Chargement…</div>';
+    return;
+  }
   buildExistingClients();
   if(!_accueilData.dossierNum) _accueilData.dossierNum=genDossierNum();
-  if(!_accueilData.avocatResp && typeof currentProfile!=="undefined" && currentProfile) _accueilData.avocatResp=currentProfile.full_name||"";
+  if(!_accueilData.avocatResp && currentProfile) _accueilData.avocatResp=currentProfile.full_name||'';
   _accueilStep = _accueilStep || 1;
   document.getElementById('page-accueil').innerHTML = buildAccueilHTML();
   bindAccueilEvents();
@@ -1267,8 +1325,8 @@ function buildStep2(){
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin-bottom:1rem">
       <div>
         <div style="font-family:'JetBrains Mono',monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Avocat responsable *</div>
-        <select id="avocatSel" onchange="_accueilData.avocatResp=this.value" style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--text);background:var(--surface2);outline:none;width:100%">
-          ${(typeof allProfiles!=='undefined'?allProfiles:[]).map(a=>`<option ${_accueilData.avocatResp===a.name?'selected':''}>${a.name}</option>`).join('')}
+        <select id="avocatSel" onchange="_accueilData.avocatResp=this.value"  style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--text);background:var(--surface2);outline:none;width:100%">
+          ${(typeof allProfiles!=='undefined'&&allProfiles.length?allProfiles:[{full_name:currentProfile?currentProfile.full_name:''}]).map(a=>`<option ${_accueilData.avocatResp===(a.full_name||a.name)?'selected':''}>${a.full_name||a.name}</option>`).join('')}
         </select>
       </div>
       <div>
@@ -1776,6 +1834,8 @@ function buildExistingClients(){
     }
   } catch(e){}
 })();
+}
+}
 </script>
 </body>
 </html>
