@@ -1153,9 +1153,22 @@ window.saveNote=function(){
   toast('✓ Note sauvegardée — '+window._activeDos,'ok');
 }
 function renderAccueil(){
+  // Charger les données si pas encore fait
+  if(typeof allProfiles==='undefined'||!allProfiles.length){
+    loadData().then(function(){
+      buildExistingClients();
+      if(!_accueilData.dossierNum) _accueilData.dossierNum=genDossierNum();
+      if(!_accueilData.avocatResp && currentProfile) _accueilData.avocatResp=currentProfile.full_name||'';
+      _accueilStep = _accueilStep || 1;
+      document.getElementById('page-accueil').innerHTML = buildAccueilHTML();
+      bindAccueilEvents();
+    });
+    document.getElementById('page-accueil').innerHTML = '<div style="text-align:center;padding:3rem;color:var(--text3)">Chargement…</div>';
+    return;
+  }
   buildExistingClients();
   if(!_accueilData.dossierNum) _accueilData.dossierNum=genDossierNum();
-  if(!_accueilData.avocatResp && typeof currentProfile!=="undefined" && currentProfile) _accueilData.avocatResp=currentProfile.full_name||"";
+  if(!_accueilData.avocatResp && currentProfile) _accueilData.avocatResp=currentProfile.full_name||'';
   _accueilStep = _accueilStep || 1;
   document.getElementById('page-accueil').innerHTML = buildAccueilHTML();
   bindAccueilEvents();
@@ -1267,8 +1280,8 @@ function buildStep2(){
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin-bottom:1rem">
       <div>
         <div style="font-family:'JetBrains Mono',monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Avocat responsable *</div>
-        <select id="avocatSel" onchange="_accueilData.avocatResp=this.value" style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--text);background:var(--surface2);outline:none;width:100%">
-          ${(typeof allProfiles!=='undefined'?allProfiles:[]).map(a=>`<option ${_accueilData.avocatResp===a.name?'selected':''}>${a.name}</option>`).join('')}
+        <select id="avocatSel" onchange="_accueilData.avocatResp=this.value"  style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--text);background:var(--surface2);outline:none;width:100%">
+          ${(typeof allProfiles!=='undefined'&&allProfiles.length?allProfiles:[{full_name:currentProfile?currentProfile.full_name:''}]).map(a=>`<option ${_accueilData.avocatResp===(a.full_name||a.name)?'selected':''}>${a.full_name||a.name}</option>`).join('')}
         </select>
       </div>
       <div>
