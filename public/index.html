@@ -996,7 +996,7 @@ function renderFinancier(){
   var realDos = Object.values(dossierMap);
   var myDos = isAdminView() ? realDos : realDos.filter(function(d){ return d.avocat_id===currentUser.id; });
   if(!myDos.length) {
-    document.getElementById('page-financier').innerHTML='<div class="empty" style="padding:4rem">Aucune entrée de temps enregistrée pour l'instant.</div>';
+    document.getElementById('page-financier').innerHTML='<div class="empty" style="padding:4rem">Aucune entrée de temps enregistrée pour l\'instant.</div>';
     return;
   }
   var DOSSIERS_FIN = myDos; // Use real data
