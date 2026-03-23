@@ -25,7 +25,10 @@
 body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
 
 /* ── AUTH SCREEN ── */
-#authScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:1rem;background:var(--bg);background-image:radial-gradient(ellipse at 20% 30%,rgba(201,168,76,.06) 0%,transparent 60%),radial-gradient(ellipse at 80% 70%,rgba(160,64,48,.04) 0%,transparent 60%)}
+#authScreen{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:1000;align-items:center;justify-content:center;min-height:100vh;padding:1rem;background:var(--bg);background-image:radial-gradient(ellipse at 20% 30%,rgba(201,168,76,.06) 0%,transparent 60%),radial-gradient(ellipse at 80% 70%,rgba(160,64,48,.04) 0%,transparent 60%)}
+#authScreen.visible{display:flex;}
+#loadingScreen{position:fixed;top:0;left:0;right:0;bottom:0;z-index:999;display:flex;align-items:center;justify-content:center;background:var(--bg);flex-direction:column;gap:1rem;}
+#loadingScreen.hidden{display:none;}
 .auth-box{width:100%;max-width:400px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:2.5rem;position:relative;overflow:hidden}
 .auth-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--gold2),var(--gold))}
 .auth-logo{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:600;color:var(--gold);text-align:center;margin-bottom:.25rem}
@@ -508,6 +511,27 @@ var typeLabels = {judiciaire:'⚖️ Audience',depot:'📄 Dépôt',prescription
 // ══════════════════════════════════════════════
 // BOOT — Auth state listener
 // ══════════════════════════════════════════════
+function showAuth() {
+  var ls = document.getElementById('loadingScreen');
+  var as = document.getElementById('authScreen');
+  var ma = document.getElementById('mainApp');
+  if(ls) ls.classList.add('hidden');
+  if(as) { as.style.display='flex'; as.classList.add('visible'); }
+  if(ma) ma.style.display='none';
+}
+function showApp() {
+  var ls = document.getElementById('loadingScreen');
+  var as = document.getElementById('authScreen');
+  var ma = document.getElementById('mainApp');
+  if(ls) ls.classList.add('hidden');
+  if(as) { as.style.display='none'; as.classList.remove('visible'); }
+  if(ma) ma.style.display='flex';
+}
+function hideLoading() {
+  var ls = document.getElementById('loadingScreen');
+  if(ls) ls.classList.add('hidden');
+}
+
 sb.auth.onAuthStateChange(async (event, session) => {
   if (session && session.user) {
     currentUser = session.user;
@@ -600,7 +624,7 @@ async function signOut() {
 function showAuthErr(msg) { var el=document.getElementById('authErr');el.textContent=msg;el.classList.add('show'); }
 
 function hideLoading() { document.getElementById('loadingScreen').style.display='none'; }
-function showAuth()    { document.getElementById('authScreen').style.display='flex';document.getElementById('appScreen').style.display='none'; }
+function showAuth_old()    { document.getElementById('authScreen').style.display='flex';document.getElementById('appScreen').style.display='none'; }
 function showApp()     { document.getElementById('authScreen').style.display='none';document.getElementById('appScreen').style.display='block'; }
 
 // ══════════════════════════════════════════════
