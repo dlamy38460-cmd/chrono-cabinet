@@ -1249,6 +1249,17 @@ function renderFinancier(){
     ${tabsHtml}${mainContent}`;
 }
 function setFinTab(t,btn){finTab=t;renderFinancier();}
+function toggleRow(label, sub, key) {
+    var checked = _conflitSettings[key] !== undefined ? _conflitSettings[key] : true;
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:.42rem 0;border-bottom:1px solid var(--border);gap:.8rem">'
+      + '<div><div style="font-size:.81rem;color:var(--text2)">'+label+'</div>'+(sub?'<div style="font-size:.68rem;color:var(--text3);margin-top:1px">'+sub+'</div>':'')+'</div>'
+      + '<label style="position:relative;width:34px;height:19px;flex-shrink:0;cursor:pointer">'
+        + '<input type="checkbox" '+(checked?'checked':'')+' data-key="'+key+'" onchange="toggleConflitSetting(this)" style="opacity:0;width:0;height:0;position:absolute">'
+        + '<div style="position:absolute;inset:0;background:'+(checked?'var(--sage)':'var(--surface3)')+';border-radius:9px;border:1px solid '+(checked?'var(--sage)':'var(--border2)')+';transition:background .2s" id="tr-bg-'+key+'"></div>'
+        + '<div style="position:absolute;top:3px;'+(checked?'left:17px':'left:3px')+';width:11px;height:11px;border-radius:50%;background:'+(checked?'white':'var(--text3)')+';transition:left .2s;pointer-events:none" id="tr-knob-'+key+'"></div>'
+      + '</label></div>';
+  }
+
 function renderNotifs(){
   var myNotifs = NOTIFS;
   var filtered = notifFilter==='all' ? myNotifs
@@ -1293,16 +1304,8 @@ function renderNotifs(){
       + '</div>';
   }).join('') || '<div style="text-align:center;padding:2.5rem;color:var(--text3);font-style:italic;font-size:.84rem">Aucune notification.</div>';
 
-  var toggleRow = function(label, sub, key) {
-    var checked = _conflitSettings[key] !== undefined ? _conflitSettings[key] : true;
-    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:.42rem 0;border-bottom:1px solid var(--border);gap:.8rem">'
-      + '<div><div style="font-size:.81rem;color:var(--text2)">'+label+'</div>'+(sub?'<div style="font-size:.68rem;color:var(--text3);margin-top:1px">'+sub+'</div>':'')+'</div>'
-      + '<label style="position:relative;width:34px;height:19px;flex-shrink:0;cursor:pointer">'
-        + '<input type="checkbox" '+(checked?'checked':'')+' data-key="'+key+'" onchange="toggleConflitSetting(this)" style="opacity:0;width:0;height:0;position:absolute">'
-        + '<div style="position:absolute;inset:0;background:'+(checked?'var(--sage)':'var(--surface3)')+';border-radius:9px;border:1px solid '+(checked?'var(--sage)':'var(--border2)')+';transition:background .2s" id="tr-bg-'+key+'"></div>'
-        + '<div style="position:absolute;top:3px;'+(checked?'left:17px':'left:3px')+';width:11px;height:11px;border-radius:50%;background:'+(checked?'white':'var(--text3)')+';transition:left .2s;pointer-events:none" id="tr-knob-'+key+'"></div>'
-      + '</label></div>';
-  };
+  // toggleRow moved to global scope
+
 
   var settingsHTML = '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">'
     + '<div style="padding:.85rem 1.2rem;border-bottom:1px solid var(--border);font-family:Cormorant Garamond,serif;font-size:1rem;font-weight:500;color:var(--text)">⚙️ Paramètres des alertes</div>'
