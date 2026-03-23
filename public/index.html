@@ -850,7 +850,6 @@ document.querySelectorAll('.overlay').forEach(m=>m.addEventListener('click',e=>{
 function toast(msg,type){var t=document.getElementById('toast');t.textContent=msg;t.className='toast '+(type||'ok')+' show';clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),4500);}
 
 // ── TOGGLE VUE ADMIN/AVOCAT (pour utilisateurs avec double rôle) ──────────
-var _viewMode = 'admin'; // 'admin' ou 'avocat'
 
 function toggleViewMode() {
   _viewMode = _viewMode === 'admin' ? 'avocat' : 'admin';
@@ -880,6 +879,28 @@ function isAdminView() {
   if (!isAdmin) return false; // not admin at all
   return window._renderAsAdmin !== false;
 }
+
+// ── VARIABLES UI ─────────────────────────────────────────────────────────
+var finTab = 'dossiers';
+var notifFilter = 'all';
+var echFilter = 'all';
+var _conflitParties = [
+  {name:'Distributions Laroche ltée', role:'client'},
+  {name:'Groupe Beauchamp inc.', role:'adverse'},
+  {name:'Fiducie Morin-Beauchamp', role:'tiers'},
+];
+var _conflitSearchDone = false;
+var _conflitDossierNum = '';
+var _accueilStep = 1;
+var _accueilData = {
+  clientType:'morale', clientNom:'', clientEmail:'', clientTel:'',
+  clientExisting:null, avocatResp:'', dossierNum:'', dossierDate:'',
+  domaine:'Droit civil', urgence:'Prioritaire', budget:'',
+  facturation:'Taux horaire', description:'', objectifs:[],
+  parties:[], docs:[], conflitDecision:'waived'
+};
+var _existingClients = [];
+var _viewMode = 'admin';
 
 
 // ── NOUVELLES FONCTIONNALITÉS ────────────────────────────────────────
