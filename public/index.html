@@ -1782,12 +1782,14 @@ function removePartyAccueil(i){ _accueilData.parties.splice(i,1); renderAccueil(
 function setConflitDecision(v){ _accueilData.conflitDecision=v; renderAccueil(); }
 
 function toggleConflitSetting(el) {
-  var key = el.getAttribute('data-key');
+  if (!el) return;
+  var key = el.dataset ? el.dataset.key : el.getAttribute('data-key');
+  if (!key) return;
   var checked = el.checked;
   _conflitSettings[key] = checked;
-  // Update visual without re-rendering
-  var bg   = document.getElementById('tr-bg-'+key);
-  var knob = document.getElementById('tr-knob-'+key);
+  // Re-render just the toggle visuals directly
+  var bg   = el.parentNode ? el.parentNode.querySelector('[id^="tr-bg-"]') : document.getElementById('tr-bg-'+key);
+  var knob = el.parentNode ? el.parentNode.querySelector('[id^="tr-knob-"]') : document.getElementById('tr-knob-'+key);
   if (bg) {
     bg.style.background = checked ? 'var(--sage)' : 'var(--surface3)';
     bg.style.borderColor = checked ? 'var(--sage)' : 'var(--border2)';
