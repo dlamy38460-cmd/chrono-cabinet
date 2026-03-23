@@ -962,45 +962,7 @@ function toggleTheme(){
   try { localStorage.setItem('chrono-theme', isLight ? 'light' : 'dark'); } catch(e){}
 }
 function renderFinancier(){
-  // Build financial data from real Supabase entries
-  var allEntries = typeof entries!=='undefined' ? entries : [];
-  var allProfs = typeof allProfiles!=='undefined' ? allProfiles : [];
-  
-  // Group entries by dossier
-  var dossierMap = {};
-  allEntries.forEach(function(e) {
-    if(!dossierMap[e.dossier]) {
-      var prof = allProfs.find(function(p){ return p.id===e.user_id; });
-      dossierMap[e.dossier] = {
-        dossier: e.dossier,
-        client: e.dossier, // Use dossier as client name until we have client table
-        avocat: prof ? (prof.full_name||prof.email) : 'Inconnu',
-        avocat_id: e.user_id,
-        heuresTotal: 0,
-        honorairesTotal: 0,
-        honorairesBudget: 10000, // Default budget
-        facture: 0,
-        statut: 'actif',
-        moisData: Array(12).fill(0),
-      };
-    }
-    dossierMap[e.dossier].heuresTotal += e.minutes/60;
-    dossierMap[e.dossier].honorairesTotal += parseFloat(e.montant||0);
-    // Map to month index (0-11)
-    if(e.date) {
-      var mo = new Date(e.date+'T12:00:00').getMonth();
-      dossierMap[e.dossier].moisData[mo] += parseFloat(e.montant||0);
-    }
-  });
-  
-  var realDos = Object.values(dossierMap);
-  var myDos = isAdminView() ? realDos : realDos.filter(function(d){ return d.avocat_id===currentUser.id; });
-  if(!myDos.length) {
-    document.getElementById('page-financier').innerHTML='<div class="empty" style="padding:4rem">Aucune entrée de temps enregistrée pour l'instant.</div>';
-    return;
-  }
-  var DOSSIERS_FIN = myDos; // Use real data
-  var myDos=isAdminView()?DOSSIERS_FIN:DOSSIERS_FIN.filter(function(d){return d.avocat_id===currentUser.id;});
+  var myDos=isAdmin?DOSSIERS_FIN:DOSSIERS_FIN.filter(d=>d.avocat===(typeof allProfiles!=='undefined'?allProfiles:[]).find(a=>a.id===currentUser?.id)?.name);
   var totH=myDos.reduce((s,d)=>s+d.heuresTotal,0);
   var totAmt=myDos.reduce((s,d)=>s+d.honorairesTotal,0);
   var totFact=myDos.reduce((s,d)=>s+d.facture,0);
@@ -1053,7 +1015,7 @@ function renderFinancier(){
     mainContent=`<div class="card card-accent" style="overflow-x:auto"><div class="chart-title">Rentabilité par dossier</div><table class="rent-table"><thead><tr><th>Dossier</th><th>Client</th>${isAdmin?'<th>Avocat</th>':''}<th class="right">Heures</th><th class="right">Honoraires</th><th class="right">Non facturé</th><th>Rentabilité</th><th>Statut</th></tr></thead><tbody>${tableRows}</tbody></table></div>`;
   } else if(finTab==='avocat'){
     var avRows=(typeof allProfiles!=='undefined'?allProfiles:[]).map(av=>{
-      var avD=DOSSIERS_FIN.filter(function(d){return d.avocat_id===av.id;});
+      var avD=DOSSIERS_FIN.filter(d=>d.avocat===av.name);
       if(!isAdmin&&av.id!==currentUser?.id)return'';
       var avH=avD.reduce((s,d)=>s+d.heuresTotal,0),avAmt=avD.reduce((s,d)=>s+d.honorairesTotal,0),avF=avD.reduce((s,d)=>s+d.facture,0);
       var txH=avH>0?avAmt/avH:0;
@@ -1191,22 +1153,9 @@ window.saveNote=function(){
   toast('✓ Note sauvegardée — '+window._activeDos,'ok');
 }
 function renderAccueil(){
-  // Charger les données si pas encore fait
-  if(typeof allProfiles==='undefined'||!allProfiles.length){
-    loadData().then(function(){
-      buildExistingClients();
-      if(!_accueilData.dossierNum) _accueilData.dossierNum=genDossierNum();
-      if(!_accueilData.avocatResp && currentProfile) _accueilData.avocatResp=currentProfile.full_name||'';
-      _accueilStep = _accueilStep || 1;
-      document.getElementById('page-accueil').innerHTML = buildAccueilHTML();
-      bindAccueilEvents();
-    });
-    document.getElementById('page-accueil').innerHTML = '<div style="text-align:center;padding:3rem;color:var(--text3)">Chargement…</div>';
-    return;
-  }
   buildExistingClients();
   if(!_accueilData.dossierNum) _accueilData.dossierNum=genDossierNum();
-  if(!_accueilData.avocatResp && currentProfile) _accueilData.avocatResp=currentProfile.full_name||'';
+  if(!_accueilData.avocatResp && typeof currentProfile!=="undefined" && currentProfile) _accueilData.avocatResp=currentProfile.full_name||"";
   _accueilStep = _accueilStep || 1;
   document.getElementById('page-accueil').innerHTML = buildAccueilHTML();
   bindAccueilEvents();
@@ -1318,8 +1267,8 @@ function buildStep2(){
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin-bottom:1rem">
       <div>
         <div style="font-family:'JetBrains Mono',monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Avocat responsable *</div>
-        <select id="avocatSel" onchange="_accueilData.avocatResp=this.value"  style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--text);background:var(--surface2);outline:none;width:100%">
-          ${(typeof allProfiles!=='undefined'&&allProfiles.length?allProfiles:[{full_name:currentProfile?currentProfile.full_name:''}]).map(a=>`<option ${_accueilData.avocatResp===(a.full_name||a.name)?'selected':''}>${a.full_name||a.name}</option>`).join('')}
+        <select id="avocatSel" onchange="_accueilData.avocatResp=this.value" style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--text);background:var(--surface2);outline:none;width:100%">
+          ${(typeof allProfiles!=='undefined'?allProfiles:[]).map(a=>`<option ${_accueilData.avocatResp===a.name?'selected':''}>${a.name}</option>`).join('')}
         </select>
       </div>
       <div>
@@ -1827,7 +1776,6 @@ function buildExistingClients(){
     }
   } catch(e){}
 })();
-}
 </script>
 </body>
 </html>
