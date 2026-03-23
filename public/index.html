@@ -434,6 +434,13 @@ const SUPABASE_ANON  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmF
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
+// Afficher immédiatement l'écran de connexion
+// onAuthStateChange prendra le relais si session active
+document.addEventListener('DOMContentLoaded', function() {
+  hideLoading();
+  showAuth();
+});
+
 // ══════════════════════════════════════════════
 // STATE
 // ══════════════════════════════════════════════
