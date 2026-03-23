@@ -583,7 +583,7 @@ function renderUserPill() {
 }
 
 function applyRoleUI() {
-  document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdmin ? '' : 'none');
+  document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdmin ? 'block' : 'none'); document.querySelectorAll('button.admin-only, .nav-item.admin-only').forEach(el => el.style.display = isAdmin ? 'flex' : 'none');
   // Show view toggle only for admin users (they can switch to avocat view)
   var btn = document.getElementById('viewToggleBtn');
   if (btn) btn.style.display = isAdmin ? 'flex' : 'none';
@@ -876,7 +876,7 @@ function toggleViewMode() {
   var val = document.getElementById('viewToggleVal');
   if (val) val.textContent = isAdminView ? '⚡ Admin' : '👤 Avocat';
   // Update nav visibility
-  document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdminView ? '' : 'none');
+  document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdminView ? 'block' : 'none'); document.querySelectorAll('button.admin-only, .nav-item.admin-only').forEach(el => el.style.display = isAdminView ? 'flex' : 'none');
   // Refresh current page
   var active = document.querySelector('.nav-item.active');
   var page = active ? active.getAttribute('onclick').match(/'([^']+)'/)[1] : 'dashboard';
