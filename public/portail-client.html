@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portail client — Cabinet LAMY</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@300;400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#faf8f4;--surface:#ffffff;--surface2:#f5f1ea;--surface3:#ede8dd;
+  --border:#e0d9ce;--border2:#d0c8ba;
+  --ink:#1a1612;--ink2:#4a4238;--ink3:#8a7e70;
+  --gold:#9a7a2c;--gold-light:#c9a84c;--gold-dim:rgba(154,122,44,.1);--gold-glow:rgba(154,122,44,.06);
+  --sage:#3a6a34;--sage-dim:rgba(58,106,52,.1);
+  --rust:#8a3020;--rust-dim:rgba(138,48,32,.1);
+  --amber:#b06818;--amber-dim:rgba(176,104,24,.1);
+  --r:4px;--ease:.18s ease;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px;line-height:1.5}
+
+/* HEADER */
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:1.2rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:0 1px 8px rgba(26,22,18,.06)}
+.cab-logo{display:flex;align-items:center;gap:.8rem}
+.cab-logo-mark{width:36px;height:36px;background:var(--ink);border-radius:3px;display:flex;align-items:center;justify-content:center}
+.cab-logo-mark span{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;color:#c9a84c;line-height:1}
+.cab-name{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:600;color:var(--ink)}
+.cab-sub{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-top:1px}
+.secure-badge{display:flex;align-items:center;gap:.4rem;font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--sage);background:var(--sage-dim);border:1px solid rgba(58,106,52,.2);padding:.3rem .7rem;border-radius:20px}
+
+/* MAIN */
+main{max-width:820px;margin:0 auto;padding:2rem 1.5rem}
+
+/* DOSSIER HEADER */
+.dossier-header{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.6rem 1.8rem;margin-bottom:1.5rem;position:relative;overflow:hidden}
+.dossier-header::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold-light))}
+.dh-top{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:1rem;flex-wrap:wrap}
+.dh-num{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--gold);background:var(--gold-dim);border:1px solid rgba(154,122,44,.2);padding:.2rem .6rem;border-radius:3px;margin-bottom:.4rem;display:inline-block}
+.dh-title{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:500;color:var(--ink);line-height:1.2;margin-bottom:.3rem}
+.dh-client{font-size:.85rem;color:var(--ink2)}
+.dh-status{display:flex;align-items:center;gap:.4rem;padding:.35rem .9rem;border-radius:20px;font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:600;white-space:nowrap}
+.dh-status.actif{background:var(--sage-dim);color:var(--sage);border:1px solid rgba(58,106,52,.2)}
+.dh-meta{display:flex;gap:1.5rem;flex-wrap:wrap}
+.dh-meta-item{display:flex;flex-direction:column;gap:2px}
+.dml{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase}
+.dmv{font-size:.84rem;color:var(--ink);font-weight:500}
+
+/* TABS */
+.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:1.4rem;gap:0}
+.tab{padding:.7rem 1.2rem;font-size:.83rem;cursor:pointer;color:var(--ink3);border-bottom:2px solid transparent;transition:all var(--ease);font-family:'Outfit',sans-serif;white-space:nowrap}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold);font-weight:500}
+.tab:hover{color:var(--ink2)}
+.tab-panel{display:none;animation:fadeIn .2s ease}
+.tab-panel.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* PROGRESS */
+.progress-section{margin-bottom:1.4rem}
+.prog-label{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.5rem;display:flex;justify-content:space-between}
+.prog-track{height:8px;background:var(--surface3);border-radius:4px;overflow:hidden;margin-bottom:1rem}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-light));border-radius:4px;transition:width .6s ease}
+.prog-phases{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem}
+.phase{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:.65rem .7rem;text-align:center}
+.phase.done{background:var(--sage-dim);border-color:rgba(58,106,52,.2)}
+.phase.current{background:var(--gold-dim);border-color:rgba(154,122,44,.2)}
+.phase-icon{font-size:1rem;margin-bottom:.25rem}
+.phase-lbl{font-size:.72rem;color:var(--ink2);line-height:1.3}
+.phase.done .phase-lbl{color:var(--sage)}.phase.current .phase-lbl{color:var(--gold);font-weight:500}
+
+/* TIMELINE */
+.timeline{display:flex;flex-direction:column;gap:0}
+.tl-item{display:flex;gap:1rem;padding-bottom:1.2rem;position:relative}
+.tl-item:last-child{padding-bottom:0}
+.tl-left{display:flex;flex-direction:column;align-items:center;gap:0;flex-shrink:0;width:32px}
+.tl-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px;z-index:1}
+.tl-dot.done{background:var(--sage);border:2px solid var(--sage)}
+.tl-dot.current{background:var(--gold-light);border:2px solid var(--gold);box-shadow:0 0 0 3px var(--gold-dim)}
+.tl-dot.future{background:var(--bg);border:2px solid var(--border2)}
+.tl-line{width:1px;background:var(--border);flex:1;margin-top:2px}
+.tl-item:last-child .tl-line{display:none}
+.tl-body{flex:1;min-width:0}
+.tl-date{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--ink3);margin-bottom:.2rem}
+.tl-title{font-size:.86rem;font-weight:500;color:var(--ink);margin-bottom:.2rem}
+.tl-title.future{color:var(--ink3)}
+.tl-desc{font-size:.8rem;color:var(--ink2);line-height:1.5}
+.tl-desc.future{font-style:italic}
+.tl-avocat{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--ink3);margin-top:.25rem;display:flex;align-items:center;gap:.3rem}
+.tl-av-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);flex-shrink:0}
+
+/* HONORAIRES */
+.honor-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.4rem}
+.hs-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1rem 1.2rem}
+.hs-lbl{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.3rem}
+.hs-val{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:500;color:var(--ink);line-height:1}
+.hs-sub{font-size:.72rem;color:var(--ink3);margin-top:.25rem}
+
+.honor-table{width:100%;border-collapse:collapse;margin-bottom:.5rem}
+.honor-table th{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;padding:.55rem .7rem;text-align:left;border-bottom:1px solid var(--border);background:var(--surface2)}
+.honor-table th.right{text-align:right}
+.honor-table td{padding:.65rem .7rem;border-bottom:1px solid var(--border);font-size:.82rem;color:var(--ink);vertical-align:top}
+.honor-table td.right{text-align:right;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--ink2)}
+.honor-table td.desc{color:var(--ink2);line-height:1.45}
+.honor-table tr:last-child td{border-bottom:none}
+.honor-table tr:hover td{background:var(--surface2)}
+.ht-date{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--ink3)}
+.ht-avocat{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--ink3);margin-top:2px}
+.total-row td{font-weight:600;border-top:2px solid var(--border2);border-bottom:none}
+.total-row td.right{color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:1.1rem}
+.badge-sm{font-family:'JetBrains Mono',monospace;font-size:.57rem;padding:.08rem .35rem;border-radius:3px}
+.bs-inc{background:var(--sage-dim);color:var(--sage)}
+.bs-pend{background:var(--amber-dim);color:var(--amber)}
+
+/* DOCUMENTS */
+.doc-list{display:flex;flex-direction:column;gap:.6rem}
+.doc-item{display:flex;align-items:center;gap:.9rem;padding:.8rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);transition:all var(--ease)}
+.doc-item:hover{border-color:var(--border2);box-shadow:0 2px 8px rgba(26,22,18,.06)}
+.doc-icon{width:34px;height:34px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0}
+.di-pdf{background:#fde8e8}.di-word{background:#e8f0fe}.di-misc{background:var(--surface2)}
+.doc-info{flex:1;min-width:0}
+.doc-name{font-size:.85rem;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.doc-meta{font-family:'JetBrains Mono',monospace;font-size:.63rem;color:var(--ink3);margin-top:2px}
+.doc-size{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--ink3);white-space:nowrap}
+.btn-dl{padding:.35rem .8rem;border:1px solid var(--border2);border-radius:var(--r);background:var(--surface);color:var(--ink2);font-family:'Outfit',sans-serif;font-size:.75rem;cursor:pointer;transition:all var(--ease);white-space:nowrap}
+.btn-dl:hover{border-color:var(--gold);color:var(--gold)}
+
+/* CONTACTS */
+.contact-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.1rem 1.3rem;display:flex;align-items:center;gap:1rem;margin-bottom:.6rem}
+.cc-avatar{width:38px;height:38px;border-radius:50%;background:var(--ink);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--gold-light);flex-shrink:0;font-weight:600}
+.cc-info{flex:1}
+.cc-name{font-size:.88rem;font-weight:500;color:var(--ink)}
+.cc-role{font-size:.75rem;color:var(--ink3);margin-top:1px}
+.cc-contact{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--gold);margin-top:.25rem}
+
+/* MESSAGE */
+.msg-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.2rem;margin-top:1rem}
+.msg-box h3{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:500;color:var(--ink);margin-bottom:.8rem}
+textarea.msg{border:1px solid var(--border2);border-radius:var(--r);padding:.75rem .9rem;font-family:'Outfit',sans-serif;font-size:.84rem;color:var(--ink);background:var(--bg);outline:none;width:100%;resize:vertical;min-height:90px;line-height:1.6;transition:border-color var(--ease)}
+textarea.msg:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-glow)}
+.btn-send{margin-top:.7rem;padding:.7rem 1.4rem;background:var(--ink);color:#faf8f4;border:none;border-radius:var(--r);font-family:'Outfit',sans-serif;font-size:.83rem;font-weight:500;cursor:pointer;transition:all var(--ease)}
+.btn-send:hover{background:#2d2720;transform:translateY(-1px)}
+
+/* EXPIRED */
+.expired-screen{text-align:center;padding:4rem 2rem;max-width:400px;margin:0 auto}
+.exp-icon{font-size:2.5rem;margin-bottom:1rem}
+.exp-title{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:500;color:var(--ink);margin-bottom:.5rem}
+.exp-desc{font-size:.84rem;color:var(--ink2);line-height:1.6}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);padding:1.2rem 2rem;text-align:center;margin-top:3rem;background:var(--surface)}
+.ft-text{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--ink3);line-height:1.8}
+.ft-secure{display:flex;align-items:center;justify-content:center;gap:.4rem;margin-top:.4rem;font-size:.65rem;color:var(--ink3)}
+
+.toast{position:fixed;bottom:1.4rem;left:50%;transform:translateX(-50%) translateY(60px);padding:.82rem 1.6rem;border-radius:var(--r);font-size:.82rem;font-weight:500;opacity:0;transition:all .35s cubic-bezier(.34,1.56,.64,1);z-index:600;box-shadow:0 6px 22px rgba(0,0,0,.15);pointer-events:none;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.ok{background:var(--sage);color:white}.toast.info{background:var(--ink);color:#faf8f4}
+
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+@media(max-width:600px){
+  header{padding:1rem}.main-pad{padding:1.2rem 1rem}
+  .honor-summary{grid-template-columns:1fr 1fr}.prog-phases{grid-template-columns:1fr 1fr}
+  .dh-top{flex-direction:column}.dh-meta{gap:.8rem}
+  .honor-table th:nth-child(2),.honor-table td:nth-child(2){display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- DEMO SWITCHER (mockup only) -->
+<div style="position:fixed;top:12px;right:16px;z-index:200;display:flex;gap:.4rem;background:white;border:1px solid var(--border2);border-radius:20px;padding:.3rem .4rem;box-shadow:0 2px 8px rgba(0,0,0,.1)">
+  <span style="font-size:.62rem;color:var(--ink3);font-family:'JetBrains Mono',monospace;padding:.3rem .5rem">Lien :</span>
+  <button style="padding:.3rem .8rem;border-radius:16px;font-size:.72rem;font-family:'JetBrains Mono',monospace;cursor:pointer;border:none;background:rgba(154,122,44,.12);color:var(--gold);font-weight:500">Valide</button>
+  <button style="padding:.3rem .8rem;border-radius:16px;font-size:.72rem;font-family:'JetBrains Mono',monospace;cursor:pointer;border:none;background:transparent;color:var(--ink3)" onclick="showExpired()">Expiré</button>
+</div>
+
+<header>
+  <div class="cab-logo">
+    <div style="border:2px solid #1a1612;padding:.12rem .55rem;margin-right:.3rem">
+      <span style="font-family:'Outfit',sans-serif;font-size:1.1rem;font-weight:600;color:#1a1612;letter-spacing:.15em">LAMY</span>
+    </div>
+    <div>
+      <div class="cab-sub" style="margin-top:0">Avocats · Québec</div>
+    </div>
+  </div>
+  <div class="secure-badge">
+    🔒 Lien sécurisé · Accès privé
+  </div>
+</header>
+
+<!-- PORTAIL VALIDE -->
+<div id="portalValid">
+<main>
+
+  <!-- DOSSIER HEADER -->
+  <div class="dossier-header">
+    <div class="dh-top">
+      <div>
+        <div class="dh-num">Dossier 22006-001</div>
+        <div class="dh-title">Industries Saguenay inc.<br><span style="font-style:italic;font-size:1.1rem;color:var(--ink2)">c. Groupe Beauchamp inc.</span></div>
+        <div class="dh-client" style="margin-top:.3rem">Litige contractuel — Distribution exclusive</div>
+      </div>
+      <div class="dh-status actif">● Dossier actif</div>
+    </div>
+    <div class="dh-meta">
+      <div class="dh-meta-item"><div class="dml">Avocat responsable</div><div class="dmv">Me Vaillancourt</div></div>
+      <div class="dh-meta-item"><div class="dml">Ouvert le</div><div class="dmv">12 janvier 2022</div></div>
+      <div class="dh-meta-item"><div class="dml">Dernière activité</div><div class="dmv">21 mars 2026</div></div>
+      <div class="dh-meta-item"><div class="dml">Prochaine étape</div><div class="dmv" style="color:var(--rust)">Audience — 24 mars</div></div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('avancement',this)">📊 Avancement</div>
+    <div class="tab" onclick="showTab('honoraires',this)">💰 Honoraires</div>
+    <div class="tab" onclick="showTab('documents',this)">📄 Documents</div>
+    <div class="tab" onclick="showTab('contact',this)">✉️ Contact</div>
+  </div>
+
+  <!-- AVANCEMENT -->
+  <div class="tab-panel active" id="tab-avancement">
+    <div class="progress-section">
+      <div class="prog-label">
+        <span>Progression du dossier</span>
+        <span style="color:var(--gold);font-weight:600">40%</span>
+      </div>
+      <div class="prog-track"><div class="prog-fill" style="width:40%"></div></div>
+      <div class="prog-phases">
+        <div class="phase done"><div class="phase-icon">✓</div><div class="phase-lbl">Ouverture & mise en demeure</div></div>
+        <div class="phase done"><div class="phase-icon">✓</div><div class="phase-lbl">Dépôt des procédures</div></div>
+        <div class="phase current"><div class="phase-icon">⚖️</div><div class="phase-lbl">Audience préliminaire</div></div>
+        <div class="phase"><div class="phase-icon">🏁</div><div class="phase-lbl">Jugement ou règlement</div></div>
+      </div>
+    </div>
+
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.8rem">Chronologie du dossier</div>
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-dot done"></div><div class="tl-line"></div></div>
+        <div class="tl-body">
+          <div class="tl-date">12 janvier 2022</div>
+          <div class="tl-title">Ouverture du dossier — Consultation initiale</div>
+          <div class="tl-desc">Rencontre avec M. Lapointe (PDG). Analyse du contrat de distribution et des faits. Décision de procéder avec une mise en demeure.</div>
+          <div class="tl-avocat"><div class="tl-av-dot"></div>Me Vaillancourt · 1h30</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-dot done"></div><div class="tl-line"></div></div>
+        <div class="tl-body">
+          <div class="tl-date">8 mars 2022</div>
+          <div class="tl-title">Mise en demeure transmise</div>
+          <div class="tl-desc">Mise en demeure formelle envoyée à Groupe Beauchamp inc. Délai de réponse de 10 jours accordé. Aucune réponse reçue dans le délai.</div>
+          <div class="tl-avocat"><div class="tl-av-dot"></div>Me Vaillancourt · 2h00</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-dot done"></div><div class="tl-line"></div></div>
+        <div class="tl-body">
+          <div class="tl-date">15 juin 2022</div>
+          <div class="tl-title">Dépôt de la demande introductive</div>
+          <div class="tl-desc">Demande introductive d'instance déposée à la Cour supérieure du Québec. Réclamation de 245 000 $ en dommages-intérêts.</div>
+          <div class="tl-avocat"><div class="tl-av-dot"></div>Me Vaillancourt · 4h30</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-dot done"></div><div class="tl-line"></div></div>
+        <div class="tl-body">
+          <div class="tl-date">20 mars 2026</div>
+          <div class="tl-title">Préparation à l'audience — Conférence avec l'avocat adverse</div>
+          <div class="tl-desc">Échange avec Me Fortier (avocat de Groupe Beauchamp). Positions rapprochées sur certains points. Audience maintenue au 24 mars.</div>
+          <div class="tl-avocat"><div class="tl-av-dot"></div>Me Vaillancourt · 1h30</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-dot current"></div><div class="tl-line"></div></div>
+        <div class="tl-body">
+          <div class="tl-date" style="color:var(--gold)">24 mars 2026 — Dans 3 jours</div>
+          <div class="tl-title" style="color:var(--gold)">⚖️ Audience préliminaire — Cour supérieure</div>
+          <div class="tl-desc" style="color:var(--ink2)">Audience devant le juge Létourneau. Salle 2.08, Palais de justice de Québec, 9h30. Votre présence n'est pas requise — votre avocat vous représente.</div>
+          <div class="tl-avocat" style="color:var(--gold)"><div class="tl-av-dot" style="background:var(--gold)"></div>Me Vaillancourt — À confirmer après l'audience</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-dot future"></div><div class="tl-line"></div></div>
+        <div class="tl-body">
+          <div class="tl-date">À déterminer</div>
+          <div class="tl-title future">Jugement ou proposition de règlement</div>
+          <div class="tl-desc future">Suite à l'audience, le juge rendra une décision ou les parties seront invitées à explorer un règlement à l'amiable.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HONORAIRES -->
+  <div class="tab-panel" id="tab-honoraires">
+    <div class="honor-summary">
+      <div class="hs-card">
+        <div class="hs-lbl">Total facturé</div>
+        <div class="hs-val">4 237,50 $</div>
+        <div class="hs-sub">Depuis jan. 2022</div>
+      </div>
+      <div class="hs-card">
+        <div class="hs-lbl">Ce mois (mars)</div>
+        <div class="hs-val">600,00 $</div>
+        <div class="hs-sub" style="color:var(--amber)">En attente de facture</div>
+      </div>
+      <div class="hs-card">
+        <div class="hs-lbl">Taux horaire</div>
+        <div class="hs-val">300 $</div>
+        <div class="hs-sub">Me Vaillancourt</div>
+      </div>
+    </div>
+
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.8rem">Détail des entrées de temps</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:.5rem">
+      <table class="honor-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Description du travail</th>
+            <th class="right">Durée</th>
+            <th class="right">Montant</th>
+            <th class="right">Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><div class="ht-date">21 mars 2026</div><div class="ht-avocat">Me Vaillancourt</div></td>
+            <td class="desc">Rédaction de la mise en demeure complémentaire et révision des clauses contractuelles pertinentes</td>
+            <td class="right">1h30</td>
+            <td class="right">450,00 $</td>
+            <td class="right"><span class="badge-sm bs-pend">En attente</span></td>
+          </tr>
+          <tr>
+            <td><div class="ht-date">20 mars 2026</div><div class="ht-avocat">Me Vaillancourt</div></td>
+            <td class="desc">Conférence téléphonique avec l'avocat adverse — positions préliminaires pour l'audience</td>
+            <td class="right">30 min</td>
+            <td class="right">150,00 $</td>
+            <td class="right"><span class="badge-sm bs-pend">En attente</span></td>
+          </tr>
+          <tr>
+            <td><div class="ht-date">15 juin 2022</div><div class="ht-avocat">Me Vaillancourt</div></td>
+            <td class="desc">Rédaction et dépôt de la demande introductive d'instance — recherches jurisprudentielles</td>
+            <td class="right">4h30</td>
+            <td class="right">1 350,00 $</td>
+            <td class="right"><span class="badge-sm bs-inc">Facturé</span></td>
+          </tr>
+          <tr>
+            <td><div class="ht-date">8 mars 2022</div><div class="ht-avocat">Me Vaillancourt</div></td>
+            <td class="desc">Rédaction de la mise en demeure — révision finale et transmission</td>
+            <td class="right">2h00</td>
+            <td class="right">600,00 $</td>
+            <td class="right"><span class="badge-sm bs-inc">Facturé</span></td>
+          </tr>
+          <tr>
+            <td><div class="ht-date">12 jan. 2022</div><div class="ht-avocat">Me Vaillancourt</div></td>
+            <td class="desc">Consultation initiale — analyse du contrat et évaluation de la situation</td>
+            <td class="right">1h30</td>
+            <td class="right">450,00 $</td>
+            <td class="right"><span class="badge-sm bs-inc">Facturé</span></td>
+          </tr>
+          <tr class="total-row">
+            <td colspan="3" style="color:var(--ink2);font-size:.82rem">Total des honoraires</td>
+            <td class="right">4 237,50 $</td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="font-size:.75rem;color:var(--ink3);font-style:italic">Les montants incluent les honoraires professionnels. Les taxes applicables seront ajoutées à la facturation finale.</div>
+  </div>
+
+  <!-- DOCUMENTS -->
+  <div class="tab-panel" id="tab-documents">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.8rem">Documents partagés avec vous</div>
+    <div class="doc-list">
+      <div class="doc-item">
+        <div class="doc-icon di-pdf">📄</div>
+        <div class="doc-info">
+          <div class="doc-name">Mise en demeure — 8 mars 2022.pdf</div>
+          <div class="doc-meta">Ajouté le 8 mars 2022 · Me Vaillancourt</div>
+        </div>
+        <div class="doc-size">245 Ko</div>
+        <button class="btn-dl" onclick="toast('Téléchargement — dans la vraie app','info')">⬇ Télécharger</button>
+      </div>
+      <div class="doc-item">
+        <div class="doc-icon di-pdf">📄</div>
+        <div class="doc-info">
+          <div class="doc-name">Demande introductive d'instance — juin 2022.pdf</div>
+          <div class="doc-meta">Ajouté le 15 juin 2022 · Me Vaillancourt</div>
+        </div>
+        <div class="doc-size">1,2 Mo</div>
+        <button class="btn-dl" onclick="toast('Téléchargement — dans la vraie app','info')">⬇ Télécharger</button>
+      </div>
+      <div class="doc-item">
+        <div class="doc-icon di-pdf">📄</div>
+        <div class="doc-info">
+          <div class="doc-name">Convocation — Audience 24 mars 2026.pdf</div>
+          <div class="doc-meta">Ajouté le 10 mars 2026 · Me Vaillancourt</div>
+        </div>
+        <div class="doc-size">89 Ko</div>
+        <button class="btn-dl" onclick="toast('Téléchargement — dans la vraie app','info')">⬇ Télécharger</button>
+      </div>
+      <div class="doc-item">
+        <div class="doc-icon di-word">📝</div>
+        <div class="doc-info">
+          <div class="doc-name">Sommaire de la stratégie — mars 2026.docx</div>
+          <div class="doc-meta">Ajouté le 18 mars 2026 · Me Vaillancourt</div>
+        </div>
+        <div class="doc-size">156 Ko</div>
+        <button class="btn-dl" onclick="toast('Téléchargement — dans la vraie app','info')">⬇ Télécharger</button>
+      </div>
+    </div>
+
+    <div style="margin-top:1.2rem;padding:.9rem 1.1rem;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r)">
+      <div style="font-size:.78rem;color:var(--ink2);display:flex;align-items:center;gap:.5rem">
+        🔒 <span>Ces documents sont confidentiels et partagés uniquement avec vous. Ce lien est personnel et ne doit pas être transmis à des tiers.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTACT -->
+  <div class="tab-panel" id="tab-contact">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.8rem">Votre équipe</div>
+
+    <div class="contact-card">
+      <div class="cc-avatar">V</div>
+      <div class="cc-info">
+        <div class="cc-name">Me Jean-François Vaillancourt</div>
+        <div class="cc-role">Avocat responsable du dossier · Associé</div>
+        <div class="cc-contact"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="5224333b3e3e333c313d272026123133303b3c37267c3133">[email&#160;protected]</a> · 418 555-0100 poste 201</div>
+      </div>
+    </div>
+    <div class="contact-card">
+      <div class="cc-avatar" style="background:var(--surface2);color:var(--ink)">S</div>
+      <div class="cc-info">
+        <div class="cc-name">Sophie Germain</div>
+        <div class="cc-role">Adjointe juridique — dossiers civils</div>
+        <div class="cc-contact"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="e78082958a868e89a78486858e898293c98486">[email&#160;protected]</a> · 418 555-0100 poste 105</div>
+      </div>
+    </div>
+
+    <div class="msg-box">
+      <h3>Envoyer un message à votre équipe</h3>
+      <textarea class="msg" placeholder="Posez une question ou transmettez une information à votre avocat…"></textarea>
+      <button class="btn-send" onclick="toast('Message envoyé à Me Vaillancourt','ok')">Envoyer le message</button>
+    </div>
+
+    <div style="margin-top:1rem;padding:.9rem 1.1rem;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r)">
+      <div style="font-size:.78rem;color:var(--ink2);line-height:1.6">
+        <strong style="color:var(--ink)">Urgence ?</strong> Pour toute urgence concernant votre dossier (délai imminent, nouvelle information critique), appelez directement au <strong>418 555-0100</strong>.<br>
+        <span style="color:var(--ink3)">Les heures de bureau sont du lundi au vendredi, 8h30 à 17h00.</span>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="ft-text">
+    Cabinet LAMY Avocats · 500, Grande Allée Est, Bureau 300, Québec (Québec) G1R 2J7<br>
+    Ce portail est réservé à l'usage exclusif de Industries Saguenay inc. — Dossier 22006-001
+  </div>
+  <div class="ft-secure">
+    🔒 Connexion sécurisée · Lien expirant le 21 avril 2026 · ID session : SES-4F2A9B1C
+  </div>
+</footer>
+</div><!-- /portalValid -->
+
+<!-- LIEN EXPIRÉ -->
+<div id="portalExpired" style="display:none">
+  <main style="display:flex;align-items:center;justify-content:center;min-height:60vh">
+    <div class="expired-screen">
+      <div class="exp-icon">🔒</div>
+      <div class="exp-title">Lien expiré ou invalide</div>
+      <div class="exp-desc">Ce lien d'accès sécurisé n'est plus valide. Les liens du portail client expirent automatiquement après 30 jours pour protéger la confidentialité de votre dossier.<br><br>Contactez votre avocat pour obtenir un nouveau lien.</div>
+      <div style="margin-top:1.5rem">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--ink3);margin-bottom:.4rem">Cabinet LAMY</div>
+        <div style="font-size:.84rem;color:var(--gold);font-weight:500">418 555-0100</div>
+        <div style="font-size:.78rem;color:var(--ink3)"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="84f2e5ede8e8e5eae7ebf1f6f0c4e7e5e6edeae1f0aae7e5">[email&#160;protected]</a></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+function showTab(tab, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-'+tab).classLi
