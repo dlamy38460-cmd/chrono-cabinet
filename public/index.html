@@ -786,8 +786,14 @@ async function submitEntry(){
   var {data,error}=await sb.from('time_entries').insert(payload).select().single();
   if(error){toast('Erreur sauvegarde : '+error.message,'err');btn.classList.remove('loading');btn.innerHTML=submitBtnHTML();return;}
   btn.textContent='Envoi à Juris Évolution…';
-  try{await sendToJuris(data);await sb.from('time_entries').update({juris_status:'synced'}).eq('id',data.id);toast('✓ '+dossier+' — '+minutes+' min — synchronisé','ok');}
-  catch(x){await sb.from('time_entries').update({juris_status:'error'}).eq('id',data.id);toast('Sauvegardé. Erreur envoi Juris.','err');}
+  try{
+    await sendToJuris(data);
+    await sb.from('time_entries').update({juris_status:'synced'}).eq('id',data.id);
+    toast('✓ '+dossier+' — '+minutes+' min — sauvegardé','ok');
+  } catch(x){
+    await sb.from('time_entries').update({juris_status:'pending'}).eq('id',data.id);
+    toast('✓ Sauvegardé — Juris sera synchronisé plus tard','ok');
+  }
   resetForm();await loadData();renderHistory();renderDashboard();updateErrBtn();
   btn.classList.remove('loading');btn.innerHTML=submitBtnHTML();
 }
@@ -796,10 +802,17 @@ function submitBtnHTML(){return '<svg width="13" height="13" viewBox="0 0 24 24"
 function resetForm(){['f-dossier','f-minutes','f-desc'].forEach(id=>document.getElementById(id).value='');document.getElementById('f-date').value=iso(new Date());document.getElementById('transcript').classList.remove('show');calcUpdate();}
 
 async function sendToJuris(entry){
-  // Décommentez pour la vraie intégration :
-  // var r=await fetch('https://votre-instance.jurisevolution.com/api/v1/timeentries',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer VOTRE_TOKEN'},body:JSON.stringify({file_number:entry.dossier,duration_minutes:entry.minutes,hourly_rate:entry.taux,amount:entry.montant,description:entry.description,date:entry.date})});
-  // if(!r.ok) throw new Error('HTTP '+r.status);
-  await new Promise(r=>setTimeout(r,1000));
+  // ── Juris Évolution non configuré — entrée sauvegardée localement ──
+  // Décommentez quand vous avez les infos API Juris :
+  // var resp=await fetch('https://votre-instance.jurisevolution.com/api/v1/timeentries',{
+  //   method:'POST',
+  //   headers:{'Content-Type':'application/json','Authorization':'Bearer VOTRE_TOKEN'},
+  //   body:JSON.stringify({file_number:entry.dossier,duration_minutes:entry.minutes,hourly_rate:entry.taux,amount:entry.montant,description:entry.description,date:entry.date})
+  // });
+  // if(!resp.ok) throw new Error('HTTP '+resp.status);
+  
+  // Pour l'instant : simule un succès immédiat
+  return Promise.resolve();
 }
 
 // ══════════════════════════════════════════════
