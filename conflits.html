@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chrono — Conflits d'intérêts</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@300;400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f0e0c;--surface:#161412;--surface2:#1e1b18;--surface3:#252119;
+  --border:#2e2a24;--border2:#3a3530;
+  --gold:#c9a84c;--gold2:#e8cc80;--gold-dim:rgba(201,168,76,.13);--gold-glow:rgba(201,168,76,.07);
+  --rust:#a04030;--rust-dim:rgba(160,64,48,.18);
+  --sage:#4a7a44;--sage-dim:rgba(74,122,68,.18);
+  --amber:#c87820;--amber-dim:rgba(200,120,32,.18);
+  --urgent:#c0392b;--urgent-dim:rgba(192,57,43,.18);
+  --warning:#e67e22;--warning-dim:rgba(230,126,34,.18);
+  --info:#2980b9;--info-dim:rgba(41,128,185,.18);
+  --text:#e8e0d0;--text2:#a09880;--text3:#6a6050;
+  --r:4px;--ease:.2s ease;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+
+/* LAYOUT */
+.app{display:flex;min-height:100vh}
+.sidebar{width:224px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50}
+.sidebar-logo{padding:1.4rem;border-bottom:1px solid var(--border)}
+.logo-name{font-family:'Cormorant Garamond',serif;font-size:1.75rem;font-weight:600;color:var(--gold);line-height:1}
+.logo-tag{font-family:'JetBrains Mono',monospace;font-size:.57rem;color:var(--text3);letter-spacing:.18em;text-transform:uppercase;margin-top:3px}
+.user-pill{margin:.7rem .5rem;padding:.65rem .9rem;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);display:flex;align-items:center;gap:.6rem}
+.user-avatar{width:28px;height:28px;border-radius:50%;background:var(--gold-dim);border:1px solid rgba(201,168,76,.25);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:.9rem;color:var(--gold);flex-shrink:0;font-weight:600}
+.user-info{flex:1;min-width:0}
+.user-name{font-size:.78rem;font-weight:500;color:var(--text)}
+.user-role{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--gold);margin-top:1px}
+nav{padding:.8rem .5rem;flex:1;display:flex;flex-direction:column;gap:2px}
+.nav-sec{font-family:'JetBrains Mono',monospace;font-size:.54rem;color:var(--text3);letter-spacing:.2em;text-transform:uppercase;padding:.9rem .8rem .35rem}
+.nav-item{display:flex;align-items:center;gap:.65rem;padding:.58rem .8rem;border-radius:var(--r);cursor:pointer;color:var(--text2);font-size:.83rem;transition:all var(--ease);border:none;background:none;width:100%;text-align:left;font-family:'Outfit',sans-serif}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{background:var(--gold-dim);color:var(--gold);font-weight:500}
+.nav-item.active svg{opacity:1}
+.nav-item svg{width:15px;height:15px;flex-shrink:0;opacity:.7}
+
+.content{margin-left:224px;flex:1}
+.topbar{position:sticky;top:0;z-index:40;background:rgba(15,14,12,.93);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:.85rem 2rem;display:flex;align-items:center;justify-content:space-between}
+.topbar-title{font-family:'Cormorant Garamond',serif;font-size:1.28rem;font-weight:500;color:var(--text)}
+.topbar-sub{font-size:.7rem;color:var(--text3);margin-top:1px;font-family:'JetBrains Mono',monospace}
+.admin-pill{padding:.25rem .8rem;background:var(--gold-dim);border:1px solid rgba(201,168,76,.2);border-radius:20px;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--gold)}
+
+/* TABS */
+.page-tabs{display:flex;border-bottom:1px solid var(--border);padding:0 2rem;background:var(--surface)}
+.ptab{padding:.75rem 1.2rem;font-size:.82rem;cursor:pointer;color:var(--text3);border-bottom:2px solid transparent;transition:all var(--ease);font-family:'Outfit',sans-serif;white-space:nowrap}
+.ptab.active{color:var(--gold);border-bottom-color:var(--gold);font-weight:500}
+.ptab:hover{color:var(--text2)}
+
+.main{padding:1.8rem 2rem;max-width:1020px}
+
+/* CARD */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.4rem;position:relative;overflow:hidden}
+.card-accent::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--gold2),var(--gold))}
+.card-urgent::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--urgent),var(--rust))}
+.card-ok::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--sage),#6ab864)}
+
+/* SEARCH ZONE */
+.search-zone{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);padding:1.5rem;margin-bottom:1.5rem;position:relative;overflow:hidden}
+.search-zone::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--gold2))}
+.sz-title{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:500;color:var(--text);margin-bottom:.3rem}
+.sz-sub{font-size:.75rem;color:var(--text3);font-style:italic;margin-bottom:1.2rem}
+
+.search-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+.fg{display:flex;flex-direction:column;gap:.32rem}
+.fg.full{grid-column:1/-1}
+.flbl{font-family:'JetBrains Mono',monospace;font-size:.59rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text3)}
+input[type=text],input[type=date],select,textarea{border:1px solid var(--border2);border-radius:var(--r);padding:.63rem .82rem;font-family:'JetBrains Mono',monospace;font-size:.83rem;color:var(--text);background:var(--surface);outline:none;width:100%;transition:border-color var(--ease),box-shadow var(--ease)}
+input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-glow)}
+textarea{resize:vertical;min-height:70px;font-family:'Outfit',sans-serif;font-size:.83rem;line-height:1.6}
+.hint{font-size:.63rem;color:var(--text3);font-style:italic}
+
+.parties-list{display:flex;flex-direction:column;gap:.5rem;margin-bottom:.8rem}
+.party-row{display:flex;align-items:center;gap:.6rem;padding:.6rem .8rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);animation:slideIn .15s ease}
+@keyframes slideIn{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
+.party-name{flex:1;font-size:.84rem;color:var(--text)}
+.party-role{font-family:'JetBrains Mono',monospace;font-size:.65rem;padding:.12rem .45rem;border-radius:3px;white-space:nowrap}
+.party-role.client{background:var(--info-dim);color:#5090d0}
+.party-role.adverse{background:var(--rust-dim);color:#e06050}
+.party-role.tiers{background:var(--amber-dim);color:#d09040}
+.party-remove{width:20px;height:20px;border-radius:50%;background:none;border:1px solid var(--border2);color:var(--text3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.7rem;transition:all var(--ease);flex-shrink:0}
+.party-remove:hover{border-color:var(--rust);color:#e06050}
+
+.add-party-row{display:flex;gap:.5rem;align-items:flex-end}
+.btn-add-party{padding:.63rem 1rem;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2);font-family:'Outfit',sans-serif;font-size:.8rem;cursor:pointer;transition:all var(--ease);white-space:nowrap}
+.btn-add-party:hover{border-color:var(--gold);color:var(--gold)}
+
+.btn-verify{display:flex;align-items:center;justify-content:center;gap:.6rem;padding:.9rem 2rem;background:var(--gold);color:var(--bg);border:none;border-radius:var(--r);font-family:'Outfit',sans-serif;font-size:.88rem;font-weight:600;cursor:pointer;transition:all var(--ease);width:100%;margin-top:.5rem}
+.btn-verify:hover{background:var(--gold2);transform:translateY(-1px);box-shadow:0 4px 18px rgba(201,168,76,.2)}
+.btn-verify.loading{background:var(--amber);pointer-events:none}
+
+/* RESULT BANNER */
+.result-banner{border-radius:var(--r);padding:1.2rem 1.4rem;margin-bottom:1.4rem;display:flex;align-items:flex-start;gap:1rem;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.result-banner.clear{background:var(--sage-dim);border:1px solid rgba(74,122,68,.3)}
+.result-banner.conflict{background:var(--urgent-dim);border:1px solid rgba(192,57,43,.35)}
+.result-banner.warning{background:var(--warning-dim);border:1px solid rgba(230,126,34,.3)}
+.rb-icon{font-size:1.6rem;flex-shrink:0;line-height:1}
+.rb-body{flex:1}
+.rb-title{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:500;margin-bottom:.3rem}
+.rb-title.clear{color:#6ab864}
+.rb-title.conflict{color:#e06050}
+.rb-title.warning{color:var(--warning)}
+.rb-desc{font-size:.82rem;line-height:1.6;color:var(--text2)}
+.rb-actions{display:flex;gap:.5rem;margin-top:.8rem;flex-wrap:wrap}
+.rb-btn{padding:.4rem .9rem;border-radius:var(--r);font-family:'Outfit',sans-serif;font-size:.78rem;font-weight:500;cursor:pointer;transition:all var(--ease);border:1px solid}
+.rb-btn.primary{background:var(--gold);color:var(--bg);border-color:var(--gold)}
+.rb-btn.primary:hover{background:var(--gold2)}
+.rb-btn.secondary{background:transparent;color:var(--text2);border-color:var(--border2)}
+.rb-btn.secondary:hover{border-color:var(--gold);color:var(--gold)}
+.rb-btn.danger{background:transparent;color:#e06050;border-color:rgba(192,57,43,.4)}
+.rb-btn.danger:hover{background:var(--urgent-dim)}
+
+/* CONFLICT DETAILS */
+.conflict-list{display:flex;flex-direction:column;gap:.8rem;margin-bottom:1.4rem}
+.conflict-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1rem 1.2rem;border-left:3px solid}
+.conflict-item.high{border-left-color:var(--urgent)}
+.conflict-item.medium{border-left-color:var(--warning)}
+.conflict-item.low{border-left-color:var(--info)}
+.ci-top{display:flex;align-items:flex-start;justify-content:space-between;gap:.8rem;margin-bottom:.5rem}
+.ci-title{font-size:.88rem;font-weight:500;color:var(--text);line-height:1.3}
+.ci-severity{font-family:'JetBrains Mono',monospace;font-size:.6rem;padding:.12rem .45rem;border-radius:3px;white-space:nowrap;flex-shrink:0}
+.sev-high{background:var(--urgent-dim);color:#e06050}
+.sev-medium{background:var(--warning-dim);color:#e09040}
+.sev-low{background:var(--info-dim);color:#5090d0}
+.ci-meta{font-family:'JetBrains Mono',monospace;font-size:.67rem;color:var(--text3);display:flex;flex-wrap:wrap;gap:.3rem .8rem;margin-bottom:.4rem}
+.ci-detail{font-size:.8rem;color:var(--text2);line-height:1.5;margin-bottom:.5rem}
+.ci-ref{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--text3)}
+
+/* REGISTRE TABLE */
+.reg-toolbar{display:flex;gap:.6rem;margin-bottom:1rem;flex-wrap:wrap;align-items:center}
+.search-box{flex:1;min-width:170px;display:flex;align-items:center;gap:.45rem;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);padding:.52rem .82rem}
+.search-box input{border:none;background:none;color:var(--text);font-family:'Outfit',sans-serif;font-size:.83rem;outline:none;flex:1;padding:0}
+.fsel{border:1px solid var(--border2);border-radius:var(--r);padding:.52rem .72rem;background:var(--surface2);color:var(--text2);font-family:'Outfit',sans-serif;font-size:.79rem;outline:none;cursor:pointer}
+.reg-table{width:100%;border-collapse:collapse}
+.reg-table th{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;padding:.6rem .8rem;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer}
+.reg-table th:hover{color:var(--text2)}
+.reg-table td{padding:.7rem .8rem;border-bottom:1px solid var(--border);font-size:.82rem;color:var(--text);vertical-align:top}
+.reg-table td.mono{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--text2)}
+.reg-table tr:hover td{background:var(--surface2)}
+.reg-table tr:last-child td{border-bottom:none}
+.status-pill{font-family:'JetBrains Mono',monospace;font-size:.58rem;padding:.1rem .4rem;border-radius:3px;white-space:nowrap}
+.sp-clear{background:var(--sage-dim);color:#6ab864}
+.sp-conflict{background:var(--urgent-dim);color:#e06050}
+.sp-waived{background:var(--amber-dim);color:#d09040}
+.sp-pending{background:var(--info-dim);color:#5090d0}
+.party-chips{display:flex;flex-wrap:wrap;gap:.3rem}
+.pchip{font-family:'JetBrains Mono',monospace;font-size:.6rem;padding:.1rem .4rem;border-radius:3px}
+.pchip.client{background:var(--info-dim);color:#5090d0}
+.pchip.adverse{background:var(--rust-dim);color:#e06050}
+.pchip.tiers{background:var(--amber-dim);color:#d09040}
+
+/* PARAMETRES */
+.param-section{margin-bottom:1.5rem}
+.ps-title{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:500;color:var(--text);margin-bottom:.9rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
+.param-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:.5rem 0;gap:.8rem;border-bottom:1px solid var(--border)}
+.toggle-row:last-child{border-bottom:none}
+.toggle-label{font-size:.82rem;color:var(--text2);flex:1;line-height:1.4}
+.toggle-sub{font-size:.7rem;color:var(--text3);margin-top:2px}
+.toggle{position:relative;width:36px;height:20px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0;position:absolute}
+.toggle-track{position:absolute;inset:0;background:var(--surface3);border-radius:10px;cursor:pointer;transition:background .2s;border:1px solid var(--border2)}
+.toggle input:checked + .toggle-track{background:var(--sage);border-color:var(--sage)}
+.toggle-knob{position:absolute;top:3px;left:3px;width:12px;height:12px;border-radius:50%;background:var(--text3);transition:transform .2s;pointer-events:none}
+.toggle input:checked ~ .toggle-knob{transform:translateX(16px);background:white}
+.btn-save{display:flex;align-items:center;justify-content:center;padding:.75rem;background:var(--gold);color:var(--bg);border:none;border-radius:var(--r);font-family:'Outfit',sans-serif;font-size:.84rem;font-weight:600;cursor:pointer;width:100%;transition:all var(--ease);margin-top:1rem}
+.btn-save:hover{background:var(--gold2)}
+
+/* BADGE */
+.badge{font-family:'JetBrains Mono',monospace;font-size:.6rem;padding:.1rem .45rem;border-radius:3px}
+.badge-gold{background:var(--gold-dim);color:var(--gold)}
+
+.toast{position:fixed;bottom:1.4rem;left:50%;transform:translateX(-50%) translateY(60px);padding:.82rem 1.6rem;border-radius:var(--r);font-size:.82rem;font-weight:500;opacity:0;transition:all .35s cubic-bezier(.34,1.56,.64,1);z-index:600;box-shadow:0 6px 22px rgba(0,0,0,.5);pointer-events:none;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.ok{background:var(--sage);color:white}
+.toast.err{background:var(--rust);color:white}
+.toast.info{background:var(--surface2);color:var(--text);border:1px solid var(--border2)}
+.toast.warn{background:var(--amber);color:#1a0800}
+
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--surface)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+.empty{text-align:center;padding:2.5rem;color:var(--text3);font-style:italic;font-size:.83rem}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="logo-name">Chrono</div><div class="logo-tag">Cabinet · v4.3</div></div>
+    <div class="user-pill">
+      <div class="user-avatar">V</div>
+      <div class="user-info"><div class="user-name">Me Vaillancourt</div><div class="user-role">Administrateur</div></div>
+    </div>
+    <nav>
+      <div class="nav-sec">Navigation</div>
+      <button class="nav-item" onclick="toast('Tableau de bord — voir mockup v3','info')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Tableau de bord</button>
+      <button class="nav-item" onclick="toast('Financier — voir mockup v3','info')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Financier</button>
+      <button class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Conflits d'intérêts</button>
+      <button class="nav-item" onclick="toast('Agenda — voir mockup v3','info')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Agenda</button>
+      <button class="nav-item" onclick="toast('Saisie — voir mockup v3','info')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>Saisie de temps</button>
+      <button class="nav-item" onclick="toast('Notifications — voir mockup v3','info')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Notifications</button>
+      <div class="nav-sec">Administration</div>
+      <button class="nav-item" onclick="toast('Admin — voir mockup v3','info')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Gestion avocats</button>
+    </nav>
+  </aside>
+
+  <div class="content">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Conflits d'intérêts</div>
+        <div class="topbar-sub">Vérification déontologique — Barreau du Québec</div>
+      </div>
+      <span class="admin-pill">⚡ Vue globale</span>
+    </div>
+
+    <div class="page-tabs">
+      <div class="ptab active" onclick="showTab('verification',this)">🔍 Vérification</div>
+      <div class="ptab" onclick="showTab('registre',this)">📋 Registre</div>
+      <div class="ptab" onclick="showTab('parametres',this)">⚙️ Paramètres</div>
+    </div>
+
+    <!-- ── VÉRIFICATION ── -->
+    <div class="main" id="tab-verification">
+
+      <div class="search-zone">
+        <div class="sz-title">Nouvelle vérification de conflits</div>
+        <div class="sz-sub">À effectuer avant l'ouverture de tout nouveau dossier — obligation déontologique (Code de déontologie des avocats, art. 62)</div>
+
+        <div class="search-grid">
+          <div class="fg">
+            <div class="flbl">Nouveau dossier — numéro</div>
+            <input type="text" id="newDossier" placeholder="24002-001" value="24002-001">
+          </div>
+          <div class="fg">
+            <div class="flbl">Avocat responsable</div>
+            <select id="avocatResp">
+              <option>Me Vaillancourt</option>
+              <option>Me Tremblay</option>
+              <option>Me Bergeron</option>
+              <option>Me Côté</option>
+            </select>
+          </div>
+          <div class="fg">
+            <div class="flbl">Type de dossier</div>
+            <select id="typeDossier">
+              <option>Droit civil — litige</option>
+              <option>Droit des affaires</option>
+              <option>Droit de la famille</option>
+              <option>Droit immobilier</option>
+              <option>Droit du travail</option>
+              <option>Droit criminel</option>
+            </select>
+          </div>
+          <div class="fg">
+            <div class="flbl">Date d'ouverture</div>
+            <input type="date" value="2026-03-21">
+          </div>
+          <div class="fg full">
+            <div class="flbl">Description sommaire</div>
+            <textarea placeholder="Brève description de la nature du dossier…">Litige commercial — résiliation de contrat de distribution exclusive entre deux entreprises québécoises.</textarea>
+          </div>
+        </div>
+
+        <div style="margin-bottom:1rem">
+          <div class="flbl" style="margin-bottom:.6rem">Parties impliquées</div>
+          <div class="parties-list" id="partiesList">
+            <div class="party-row" data-name="Distributions Laroche ltée" data-role="client">
+              <div class="party-name">Distributions Laroche ltée</div>
+              <span class="party-role client">Client</span>
+              <button class="party-remove" onclick="removeParty(this)">✕</button>
+            </div>
+            <div class="party-row" data-name="Groupe Beauchamp inc." data-role="adverse">
+              <div class="party-name">Groupe Beauchamp inc.</div>
+              <span class="party-role adverse">Partie adverse</span>
+              <button class="party-remove" onclick="removeParty(this)">✕</button>
+            </div>
+            <div class="party-row" data-name="Fiducie Morin-Beauchamp" data-role="tiers">
+              <div class="party-name">Fiducie Morin-Beauchamp</div>
+              <span class="party-role tiers">Tiers lié</span>
+              <button class="party-remove" onclick="removeParty(this)">✕</button>
+            </div>
+          </div>
+          <div class="add-party-row">
+            <div class="fg" style="flex:1"><input type="text" id="newPartyName" placeholder="Nom de la partie ou personne…"></div>
+            <div class="fg" style="width:160px">
+              <select id="newPartyRole">
+                <option value="client">Client</option>
+                <option value="adverse">Partie adverse</option>
+                <option value="tiers">Tiers lié</option>
+              </select>
+            </div>
+            <button class="btn-add-party" onclick="addParty()">+ Ajouter</button>
+          </div>
+          <div class="hint" style="margin-top:.4rem">Incluez toutes les parties, associés, actionnaires principaux et sociétés liées</div>
+        </div>
+
+        <button class="btn-verify" id="verifyBtn" onclick="runVerification()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Lancer la vérification de conflits
+        </button>
+      </div>
+
+      <!-- RÉSULTAT (masqué au départ) -->
+      <div id="resultZone" style="display:none">
+
+        <!-- BANNER RÉSULTAT -->
+        <div class="result-banner conflict" id="resultBanner">
+          <div class="rb-icon">⚠️</div>
+          <div class="rb-body">
+            <div class="rb-title conflict">Conflit d'intérêts détecté</div>
+            <div class="rb-desc">
+              2 correspondances trouvées dans vos dossiers actifs et archivés. Vous devez évaluer si ces conflits sont susceptibles d'affecter votre indépendance professionnelle avant de procéder à l'ouverture du dossier.
+            </div>
+            <div class="rb-actions">
+              <button class="rb-btn primary" onclick="toast('Formulaire de renonciation généré — dans la vraie app','ok')">Générer formulaire de renonciation</button>
+              <button class="rb-btn secondary" onclick="toast('Rapport exporté en PDF','ok')">Exporter rapport PDF</button>
+              <button class="rb-btn danger" onclick="toast('Dossier refusé et archivé','warn')">Refuser le dossier</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- CONFLITS DÉTECTÉS -->
+        <div style="margin-bottom:1rem">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--text3);letter-spacing:.15em;text-transform:uppercase;margin-bottom:.8rem">Correspondances trouvées</div>
+          <div class="conflict-list">
+
+            <div class="conflict-item high">
+              <div class="ci-top">
+                <div class="ci-title">Groupe Beauchamp inc. — partie adverse dans un dossier actif de Me Vaillancourt</div>
+                <span class="ci-severity sev-high">Élevé</span>
+              </div>
+              <div class="ci-meta">
+                <span>Dossier 22006-001</span>
+                <span>Me Vaillancourt</span>
+                <span>Ouvert le 12 jan. 2022</span>
+                <span>Statut : actif</span>
+              </div>
+              <div class="ci-detail">
+                <strong style="color:var(--text)">Industries Saguenay inc. c. Groupe Beauchamp inc.</strong> — Le cabinet représente actuellement Industries Saguenay inc. dans un litige contractuel contre Groupe Beauchamp inc., qui est la partie adverse dans le nouveau dossier envisagé. Représenter les deux parties dans des dossiers distincts mais liés à la même entité constitue un conflit direct.
+              </div>
+              <div class="ci-ref">Art. 62 et 63 du Code de déontologie des avocats · Règle 3.4 des Règles de déontologie</div>
+            </div>
+
+            <div class="conflict-item medium">
+              <div class="ci-top">
+                <div class="ci-title">Fiducie Morin-Beauchamp — actionnaire lié à un client actuel</div>
+                <span class="ci-severity sev-medium">Modéré</span>
+              </div>
+              <div class="ci-meta">
+                <span>Dossier 23001-002</span>
+                <span>Me Côté</span>
+                <span>Ouvert le 3 mars 2023</span>
+                <span>Statut : actif</span>
+              </div>
+              <div class="ci-detail">
+                La Fiducie Morin-Beauchamp est co-actionnaire dans Beaumont Distribution inc., client actuel représenté par Me Côté (dossier 23001-002). La relation entre les entités crée un conflit potentiel qui mérite évaluation. Une renonciation écrite des deux parties pourrait permettre de procéder sous certaines conditions.
+              </div>
+              <div class="ci-ref">Art. 62 al. 2 du Code de déontologie des avocats · Opinion du Comité d'éthique 2019-08</div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- AUCUN CONFLIT DANS LES AUTRES PARTIES -->
+        <div class="card" style="margin-bottom:1rem">
+          <div style="display:flex;align-items:center;gap:.8rem">
+            <div style="width:32px;height:32px;border-radius:50%;background:var(--sage-dim);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0">✓</div>
+            <div>
+              <div style="font-size:.85rem;font-weight:500;color:var(--text)">Distributions Laroche ltée — Aucun conflit détecté</div>
+              <div style="font-size:.75rem;color:var(--text3);margin-top:.15rem;font-family:'JetBrains Mono',monospace">Vérification dans 47 dossiers actifs et 112 dossiers archivés · Aucune correspondance</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- JOURNAL / ATTESTATION -->
+        <div class="card card-accent">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--text3);letter-spacing:.15em;text-transform:uppercase;margin-bottom:.9rem">Attestation et journal de vérification</div>
+          <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);padding:1rem;font-family:'JetBrains Mono',monospace;font-size:.72rem;line-height:1.9;color:var(--text2)">
+            <div><span style="color:var(--text3)">2026-03-21 14:32:07</span> · Vérification lancée par <span style="color:var(--gold)">Me Vaillancourt</span></div>
+            <div><span style="color:var(--text3)">2026-03-21 14:32:07</span> · Dossier vérifié : <span style="color:var(--gold)">24002-001</span> · 3 parties</div>
+            <div><span style="color:var(--text3)">2026-03-21 14:32:08</span> · Recherche dans 47 dossiers actifs + 112 archivés</div>
+            <div><span style="color:var(--text3)">2026-03-21 14:32:08</span> · <span style="color:#e06050">CONFLIT ÉLEVÉ</span> · Groupe Beauchamp inc. → dossier 22006-001</div>
+            <div><span style="color:var(--text3)">2026-03-21 14:32:08</span> · <span style="color:#e09040">CONFLIT MODÉRÉ</span> · Fiducie Morin-Beauchamp → dossier 23001-002</div>
+            <div><span style="color:var(--text3)">2026-03-21 14:32:08</span> · Résultat sauvegardé au registre · ID vérification : <span style="color:var(--gold)">VRF-2026-0089</span></div>
+          </div>
+          <div style="display:flex;gap:.5rem;margin-top:.9rem">
+            <button class="rb-btn secondary" onclick="toast('Attestation PDF générée','ok')">📄 Exporter attestation</button>
+            <button class="rb-btn secondary" onclick="toast('Copie envoyée à vaillancourt@cabinet.ca','ok')">✉️ Envoyer par courriel</button>
+          </div>
+        </div>
+
+      </div><!-- /resultZone -->
+    </div>
+
+    <!-- ── REGISTRE ── -->
+    <div class="main" id="tab-registre" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;flex-wrap:wrap;gap:.6rem">
+        <div>
+          <div style="font-size:.9rem;color:var(--text);font-weight:500">Toutes les vérifications</div>
+          <div style="font-size:.72rem;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-top:2px">89 vérifications depuis l'ouverture du cabinet</div>
+        </div>
+        <button class="rb-btn secondary" onclick="toast('Export CSV généré','ok')">⬇ Exporter CSV</button>
+      </div>
+
+      <div class="reg-toolbar">
+        <div class="search-box">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" placeholder="Rechercher dossier, partie, avocat…">
+        </div>
+        <select class="fsel">
+          <option>Tous les résultats</option>
+          <option>Conflit détecté</option>
+          <option>Aucun conflit</option>
+          <option>Renonciation signée</option>
+          <option>Dossier refusé</option>
+        </select>
+        <select class="fsel">
+          <option>Tous les avocats</option>
+          <option>Me Vaillancourt</option>
+          <option>Me Tremblay</option>
+          <option>Me Bergeron</option>
+          <option>Me Côté</option>
+        </select>
+      </div>
+
+      <div class="card" style="overflow-x:auto">
+        <table class="reg-table">
+          <thead>
+            <tr>
+              <th>ID Vérif.</th>
+              <th>Date</th>
+              <th>Dossier</th>
+              <th>Avocat</th>
+              <th>Parties vérifiées</th>
+              <th>Résultat</th>
+              <th>Décision</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="registreBody">
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── PARAMÈTRES ── -->
+    <div class="main" id="tab-parametres" style="display:none">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+        <div>
+          <div class="card card-accent">
+            <div class="param-section">
+              <div class="ps-title">Portée de la recherche</div>
+              <div class="toggle-row"><div class="toggle-label">Dossiers actifs<div class="toggle-sub">Toujours inclus</div></div><label class="toggle"><input type="checkbox" checked disabled><div class="toggle-track"></div><div class="toggle-knob"></div></label></div>
+              <div class="toggle-row"><div class="toggle-label">Dossiers archivés (fermés)<div class="toggle-sub">Recommandé — obligations déontologiques persistantes</div></div><label class="toggle"><input type="checkbox" checked onchange="toast('Paramètre mis à jour','ok')"><div class="toggle-track"></div><div class="toggle-knob"></div></label></div>
+              <div class="toggle-row"><div class="toggle-label">Dossiers refusés<div class="toggle-sub">Historique des conflits antérieurs</div></div><label class="toggle"><input type="checkbox" checked onchange="toast('Paramètre mis à jour','ok')"><div class="toggle-track"></div><div class="toggle-knob"></div></label></div>
+              <div class="toggle-row"><div class="toggle-label">Associés et actionnaires (recherche approfondie)<div class="toggle-sub">Ajoute 2–3 sec à la vérification</div></div><label class="toggle"><input type="checkbox" checked onchange="toast('Paramètre mis à jour','ok')"><div class="toggle-track"></div><div class="toggle-knob"></div></label></div>
+              <div class="toggle-row"><div class="toggle-label">Membres de la famille immédiate<div class="toggle-sub">Conjoint·e, enfants, parents</div></div><label class="toggle"><input type="checkbox" onchange="toast('Paramètre mis à jour','ok')"><div class="toggle-track"></div><div class="toggle-knob"></div></label></div>
+            </div>
+            <div class="param-section">
+              <div class="ps-title">Seuil de correspondance</div>
+              <div class="toggle-row"><div class="toggle-label">Correspondance exacte seulement</div><label class="toggle"><input type="checkbox" onchange="toast('Paramètre mis à jour','ok')"><div class="toggle-track"></div><div class="toggle-knob"></div></label></div>
+              <div class="toggle-row"><div class="toggle-label">Correspondance phonétique (noms similaires)<div class="toggle-sub">Ex. Beauchamp / Beauchamps</div></div><label class="toggle"><input type="checkbox" checked onchange="toast('Paramètre mis à jour','ok')"><div class="toggle-track"></div><div class="toggle-knob"></div></label></div>
+              <div class="toggle-row"><div class="toggle-label">Correspondance partielle (mots-clés)<div class="toggle-sub">Ex. Groupe Beauchamp → Beauchamp</div></div><label class="toggle"><input type="checkbox" checked onchange="toast('Paramètre mis à jour','ok')"><div class="toggle-track"></div><div class="toggle-knob"></div></label></div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="card card-accent">
+            <div class="param-section">
+              <div class="ps-title">Obligations et alertes</div>
+              <div class="toggle-row"><div class="toggle-label">Bloquer l'ouverture si conflit élevé<div class="toggle-sub">Requiert approbation de l'administrateur</div></div><label class="toggle"><input type="checkbox" checked onchange="toast('Paramètre mis à jour','ok')"><div class="toggle-track"></div><div class="toggle-knob"></div></label></div>
+              <div class="toggle-row"><div class="toggle-label">Alerte courriel si conflit détecté<div class="toggle-sub">Envoyé à l'avocat responsable et à l'admin</div></div><label class="toggle"><input type="checkbox" checked onchange="toast('Paramètre mis à jour','ok')"><div class="toggle-track"></div><div class="toggle-knob"></div></label></div>
+              <div class="toggle-row"><div class="toggle-label">Vérification obligatoire à l'ouverture<div class="toggle-sub">Impossible d'ouvrir un dossier sans vérification</div></div><label class="toggle"><input type="checkbox" checked onchange="toast('Paramètre mis à jour','ok')"><div class="toggle-track"></div><div class="toggle-knob"></div></label></div>
+              <div class="toggle-row"><div class="toggle-label">Re-vérification si nouvelle partie ajoutée<div class="toggle-sub">Déclenche une re-vérification automatique</div></div><label class="toggle"><input type="checkbox" onchange="toast('Paramètre mis à jour','ok')"><div class="toggle-track"></div><div class="toggle-knob"></div></label></div>
+            </div>
+            <div class="param-section">
+              <div class="ps-title">Conservation des données</div>
+              <div class="toggle-row"><div class="toggle-label">Conserver le journal de vérification<div class="toggle-sub">Recommandé — preuve déontologique</div></div><label class="toggle"><input type="checkbox" checked onchange="toast('Paramètre mis à jour','ok')"><div class="toggle-track"></div><div class="toggle-knob"></div></label></div>
+              <div class="toggle-row"><div class="toggle-label">Durée de conservation</div></div>
+              <div style="margin-top:.3rem">
+                <select onchange="toast('Paramètre mis à jour','ok')">
+                  <option>7 ans (minimum recommandé)</option>
+                  <option>10 ans</option>
+                  <option>Indéfinie</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn-save" onclick="toast('✓ Paramètres sauvegardés','ok')">Sauvegarder les paramètres</button>
+          </div>
+
+          <!-- NOTE DÉONTOLOGIQUE -->
+          <div class="card" style="margin-top:1rem;background:var(--gold-glow);border-color:rgba(201,168,76,.2)">
+            <div style="display:flex;gap:.7rem;align-items:flex-start">
+              <div style="font-size:1.2rem;flex-shrink:0">⚖️</div>
+              <div>
+                <div style="font-size:.84rem;font-weight:500;color:var(--gold);margin-bottom:.4rem">Obligations déontologiques — Barreau du Québec</div>
+                <div style="font-size:.78rem;color:var(--text2);line-height:1.65">
+                  L'article 62 du Code de déontologie des avocats oblige chaque avocat à vérifier l'absence de conflit d'intérêts avant d'accepter un mandat. Le cabinet doit conserver une preuve de cette vérification.
+                </div>
+                <div style="margin-top:.6rem">
+                  <button class="rb-btn secondary" style="font-size:.72rem" onclick="toast('Ouverture du Code de déontologie — barreau.qc.ca','info')">Consulter le Code de déontologie →</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── REGISTRE DATA ─────────────────────────────────
+var REGISTRE = [
+  {id:'VRF-2026-0089',date:'2026-03-21',dossier:'24002-001',avocat:'Me Vaillancourt',parties:['Distributions Laroche ltée','Groupe Beauchamp inc.','Fiducie Morin-Beauchamp'],resultat:'conflict',decision:'pending'},
+  {id:'VRF-2026-0088',date:'2026-03-18',dossier:'24001-001',avocat:'Me Tremblay',parties:['Dupont Services inc.'],resultat:'clear',decision:'ouvert'},
+  {id:'VRF-2026-0087',date:'2026-03-15',dossier:'23004-002',avocat:'Me Vaillancourt',parties:['Assurances Renaud ltée','Marie-Claude Renaud'],resultat:'clear',decision:'ouvert'},
+  {id:'VRF-2026-0086',date:'2026-03-10',dossier:'23003-005',avocat:'Me Bergeron',parties:['Robert Simard','Sylvie Simard'],resultat:'conflict',decision:'waived'},
+  {id:'VRF-2026-0085',date:'2026-03-05',dossier:'23003-004',avocat:'Me Côté',parties:['Constructions Gagnon inc.','Réal Gagnon'],resultat:'clear',decision:'ouvert'},
+  {id:'VRF-2026-0084',date:'2026-02-28',dossier:'23002-008',avocat:'Me Tremblay',parties:['9354-2211 Québec inc.','Bernard Lajoie'],resultat:'conflict',decision:'refused'},
+  {id:'VRF-2026-0083',date:'2026-02-20',dossier:'23001-007',avocat:'Me Vaillancourt',parties:['Systèmes Nordiques inc.'],resultat:'clear',decision:'ouvert'},
+  {id:'VRF-2026-0082',date:'2026-02-14',dossier:'22012-003',avocat:'Me Bergeron',parties:['Johanne Martel','François Martel'],resultat:'clear',decision:'ouvert'},
+];
+
+var decisLabels = {ouvert:'Dossier ouvert',waived:'Renonciation signée',refused:'Dossier refusé',pending:'En attente de décision'};
+var decisClass = {ouvert:'sp-clear',waived:'sp-waived',refused:'sp-conflict',pending:'sp-pending'};
+var parties = [];
+
+function initRegistre(){
+  document.getElementById('registreBody').innerHTML = REGISTRE.map(r => {
+    var chips = r.parties.slice(0,2).map((p,i) => `<span class="pchip ${i===0?'client':i===1?'adverse':'tiers'}">${p.length>20?p.slice(0,18)+'…':p}</span>`).join('');
+    if(r.parties.length>2) chips += `<span class="pchip tiers">+${r.parties.length-2}</span>`;
+    return `<tr>
+      <td class="mono">${r.id}</td>
+      <td class="mono">${new Date(r.date+'T12:00:00').toLocaleDateString('fr-CA',{day:'numeric',month:'short',year:'numeric'})}</td>
+      <td class="mono">${r.dossier}</td>
+      <td style="font-size:.8rem;color:var(--text2)">${r.avocat.replace('Me ','')}</td>
+      <td><div class="party-chips">${chips}</div></td>
+      <td>${r.resultat==='conflict'?'<span class="status-pill sp-conflict">⚠ Conflit</span>':'<span class="status-pill sp-clear">✓ Aucun</span>'}</td>
+      <td><span class="status-pill ${decisClass[r.decision]}">${decisLabels[r.decision]}</span></td>
+      <td><button class="rb-btn secondary" style="font-size:.7rem;padding:.25rem .6rem" onclick="toast('Rapport ${r.id} — détails complets','info')">Voir →</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── TABS ─────────────────────────────────────
+function showTab(tab, btn) {
+  ['verification','registre','parametres'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t===tab ? 'block' : 'none';
+  });
+  document.querySelectorAll('.ptab').forEach(b => b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  if(tab==='registre') initRegistre();
+}
+
+// ── PARTIES ──────────────────────────────────
+function addParty() {
+  var name = document.getElementById('newPartyName').value.trim();
+  var role = document.getElementById('newPartyRole').value;
+  if(!name) { toast('Entrez un nom de partie','info'); return; }
+  var row = document.createElement('div');
+  row.className = 'party-row';
+  row.dataset.name = name;
+  row.dataset.role = role;
+  var roleLabel = {client:'Client',adverse:'Partie adverse',tiers:'Tiers lié'}[role];
+  row.innerHTML = `<div class="party-name">${name}</div><span class="party-role ${role}">${roleLabel}</span><button class="party-remove" onclick="removeParty(this)">✕</button>`;
+  document.getElementById('partiesList').appendChild(row);
+  document.getElementById('newPartyName').value = '';
+  toast(`${name} ajouté·e comme ${roleLabel.toLowerCase()}`, 'ok');
+}
+
+function removeParty(btn) {
+  var row = btn.closest('.party-row');
+  var name = row.dataset.name;
+  row.style.opacity = '0';
+  row.style.transform = 'translateX(8px)';
+  row.style.transition = 'all .15s ease';
+  setTimeout(() => row.remove(), 150);
+  toast(`${name} retiré·e`, 'info');
+}
+
+// ── VÉRIFICATION ─────────────────────────────
+function runVerification() {
+  var btn = document.getElementById('verifyBtn');
+  btn.classList.add('loading');
+  btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin .7s linear infinite">
+    <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+  </svg> Recherche dans 159 dossiers…`;
+
+  // Simulate search phases
+  var phases = [
+    {t:600,  msg:'Analyse des parties adverses…'},
+    {t:1200, msg:'Vérification des tiers liés…'},
+    {t:1800, msg:'Recherche des correspondances phonétiques…'},
+    {t:2400, msg:'Compilation des résultats…'},
+  ];
+  phases.forEach(p => {
+    setTimeout(() => {
+      if(btn.classList.contains('loading'))
+        btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin .7s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> ${p.msg}`;
+    }, p.t);
+  });
+
+  setTimeout(() => {
+    btn.classList.remove('loading');
+    btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Lancer la vérification de conflits`;
+    document.getElementById('resultZone').style.display = 'block';
+    document.getElementById('resultZone').scrollIntoView({behavior:'smooth', block:'start'});
+    toast('⚠ 2 conflits détectés — action requise', 'err');
+  }, 2800);
+}
+
+// ── TOAST ─────────────────────────────────────
+function toast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + (type||'info') + ' show';
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), 4000);
+}
+
+// CSS spin animation
+var style = document.createElement('style');
+style.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
+document.head.appendChild(style);
+</script>
+</body>
+</html>
