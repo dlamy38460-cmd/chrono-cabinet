@@ -1060,7 +1060,7 @@ function renderFinancier(){
       var sparkData=[8500,7200,9100,8800,10200,9600,11000,9800,8400,10500,9200,avAmt];
       var sparkMax=Math.max(...sparkData)||1;
       var sparkHtml=sparkData.map((v,i)=>`<div class="spark-bar ${i===11?'active':''}" style="height:${Math.max(4,Math.round(v/sparkMax*100))}%" title="${v}$"></div>`).join('');
-      return `<div class="card" style="margin-bottom:.8rem"><div style="display:flex;align-items:center;gap:1rem;margin-bottom:.9rem"><div class="av-ava">${av.initials}</div><div style="flex:1"><div style="font-weight:500;color:var(--text);font-size:.9rem">${av.name}</div><div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--text3);margin-top:1px">${av.taux} $/h · ${avD.length} dossiers actifs</div></div><div style="text-align:right"><div style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;color:var(--gold)">${avAmt.toLocaleString('fr-CA',{minimumFractionDigits:0})} $</div><div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--text3);margin-top:1px">${avH.toFixed(1)}h · ${txH.toFixed(0)} $/h effectif</div></div></div><div style="display:flex;gap:1.5rem;margin-bottom:.9rem"><div><div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.2rem">Facturé</div><div style="font-size:.88rem;color:#6ab864;font-weight:500">${avF.toLocaleString('fr-CA',{minimumFractionDigits:0})} $</div></div><div><div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.2rem">Non facturé</div><div style="font-size:.88rem;color:#e09040;font-weight:500">${(avAmt-avF).toLocaleString('fr-CA',{minimumFractionDigits:0})} $</div></div></div><div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.4rem">Revenus — 12 derniers mois</div><div class="sparkline-wrap" style="height:40px">${sparkHtml}</div></div>`;
+      return `<div class="card" style="margin-bottom:.8rem"><div style="display:flex;align-items:center;gap:1rem;margin-bottom:.9rem"><div class="av-ava">${av.initials}</div><div style="flex:1"><div style="font-weight:500;color:var(--text);font-size:.9rem">${av.name}</div><div style="font-family:JetBrains Mono,monospace;font-size:.65rem;color:var(--text3);margin-top:1px">${av.taux} $/h · ${avD.length} dossiers actifs</div></div><div style="text-align:right"><div style="font-family:Cormorant Garamond,serif;font-size:1.6rem;color:var(--gold)">${avAmt.toLocaleString('fr-CA',{minimumFractionDigits:0})} $</div><div style="font-family:JetBrains Mono,monospace;font-size:.62rem;color:var(--text3);margin-top:1px">${avH.toFixed(1)}h · ${txH.toFixed(0)} $/h effectif</div></div></div><div style="display:flex;gap:1.5rem;margin-bottom:.9rem"><div><div style="font-family:JetBrains Mono,monospace;font-size:.58rem;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.2rem">Facturé</div><div style="font-size:.88rem;color:#6ab864;font-weight:500">${avF.toLocaleString('fr-CA',{minimumFractionDigits:0})} $</div></div><div><div style="font-family:JetBrains Mono,monospace;font-size:.58rem;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.2rem">Non facturé</div><div style="font-size:.88rem;color:#e09040;font-weight:500">${(avAmt-avF).toLocaleString('fr-CA',{minimumFractionDigits:0})} $</div></div></div><div style="font-family:JetBrains Mono,monospace;font-size:.58rem;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.4rem">Revenus — 12 derniers mois</div><div class="sparkline-wrap" style="height:40px">${sparkHtml}</div></div>`;
     }).join('');
     mainContent=avRows||'<div class="empty">Aucune donnée.</div>';
   } else {
@@ -1074,7 +1074,7 @@ function renderFinancier(){
   document.getElementById('page-financier').innerHTML=`
     <div class="stats-row ${isAdmin?'stats-4':'stats-3'}">${statsHtml}</div>
     ${isAdmin?`<div class="dash-grid" style="margin-bottom:1rem">${avBarHtml}<div class="card card-accent"><div class="chart-title">Dossiers par statut de facturation</div><div style="display:flex;flex-direction:column;gap:.7rem;margin-top:.3rem">
-      ${[{l:'Facturés',v:2,c:'#6ab864'},{l:'Partiellement facturés',v:1,c:'#e09040'},{l:'Non facturés',v:3,c:'#e06050'}].map(s=>`<div><div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:.25rem"><span style="color:var(--text2)">${s.l}</span><span style="font-family:'JetBrains Mono',monospace;color:${s.c}">${s.v}</span></div><div style="height:6px;background:var(--surface2);border-radius:3px"><div style="height:100%;width:${s.v/6*100}%;background:${s.c};border-radius:3px"></div></div></div>`).join('')}
+      ${[{l:'Facturés',v:2,c:'#6ab864'},{l:'Partiellement facturés',v:1,c:'#e09040'},{l:'Non facturés',v:3,c:'#e06050'}].map(s=>`<div><div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:.25rem"><span style="color:var(--text2)">${s.l}</span><span style="font-family:JetBrains Mono,monospace;color:${s.c}">${s.v}</span></div><div style="height:6px;background:var(--surface2);border-radius:3px"><div style="height:100%;width:${s.v/6*100}%;background:${s.c};border-radius:3px"></div></div></div>`).join('')}
     </div></div></div>`:''}
     ${tabsHtml}${mainContent}`;
 }
@@ -1098,22 +1098,25 @@ function renderNotifs(){
     {k:'ok',    l:'✓ Système'},
   ].map(f=>{
     var active = notifFilter===f.k;
-    return '<div onclick="setNF(''+f.k+'',this)" style="padding:.3rem .75rem;border:1px solid '+(active?'var(--gold)':'var(--border2)')+';border-radius:20px;font-size:.72rem;background:'+(active?'var(--gold-dim)':'var(--surface2)')+';color:'+(active?'var(--gold)':'var(--text3)')+';cursor:pointer;transition:all .2s">'+f.l+'</div>';
+    var bg2 = active?'var(--gold-dim)':'var(--surface2)';
+    var bd2 = active?'var(--gold)':'var(--border2)';
+    var cl2 = active?'var(--gold)':'var(--text3)';
+    return '<div onclick="setNF(\"'+f.k+'\",this)" style="padding:.3rem .75rem;border:1px solid '+bd2+';border-radius:20px;font-size:.72rem;background:'+bg2+';color:'+cl2+';cursor:pointer;transition:all .2s">'+f.l+'</div>';
   }).join('');
 
   var feedHTML = filtered.map(n=>{
     var bg  = bgMap[n.type]  || 'var(--surface2)';
     var bd  = bdMap[n.type]  || 'var(--border)';
     var clr = clrMap[n.type] || 'var(--text2)';
-    var metaHTML = n.meta.map(m=>'<span style="font-family:'JetBrains Mono',monospace;font-size:.64rem;color:var(--text3)">'+m+'</span>').join('<span style="color:var(--text3);margin:0 .2rem">·</span>');
-    var actionHTML = n.action ? '<div style="margin-top:.5rem"><button onclick="toast('Action : '+n.action+'','ok')" style="padding:.28rem .75rem;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);color:var(--text2);font-family:'Outfit',sans-serif;font-size:.73rem;cursor:pointer;transition:all .2s">'+n.action+' →</button></div>' : '';
+    var metaHTML = n.meta.map(function(m){ return '<span style="font-family:JetBrains Mono,monospace;font-size:.64rem;color:var(--text3)">'+m+'</span>'; }).join('<span style="color:var(--text3);margin:0 .2rem">·</span>');
+    var actionHTML = n.action ? '<div style="margin-top:.5rem"><button onclick="toast(\'Action : '+n.action+'\',\'ok\')" style="padding:.28rem .75rem;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);color:var(--text2);font-family:Outfit,sans-serif;font-size:.73rem;cursor:pointer">'+n.action+' →</button></div>' : '';
     return '<div style="background:'+bg+';border:1px solid '+bd+';border-left:3px solid '+clr+';border-radius:var(--r);padding:.9rem 1.1rem;margin-bottom:.65rem;display:flex;align-items:flex-start;gap:.85rem;position:relative">'
       + '<div style="width:34px;height:34px;border-radius:50%;background:'+bg+';display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;border:1px solid '+bd+'">'+n.icon+'</div>'
       + '<div style="flex:1;min-width:0">'
         + '<div style="font-size:.85rem;font-weight:600;color:var(--text);margin-bottom:.18rem">'+n.title+'</div>'
         + '<div style="font-size:.79rem;color:var(--text2);line-height:1.5;margin-bottom:.3rem">'+n.body+'</div>'
         + '<div style="display:flex;flex-wrap:wrap;gap:.3rem;align-items:center;margin-bottom:.18rem">'+metaHTML+'</div>'
-        + '<div style="font-family:'JetBrains Mono',monospace;font-size:.63rem;color:var(--text3)">'+n.time+'</div>'
+        + '<div style="font-family:JetBrains Mono,monospace;font-size:.63rem;color:var(--text3)">'+n.time+'</div>'
         + actionHTML
       + '</div>'
       + (n.unread ? '<div style="position:absolute;top:.7rem;right:.7rem;width:7px;height:7px;border-radius:50%;background:var(--gold)"></div>' : '')
@@ -1124,42 +1127,42 @@ function renderNotifs(){
     return '<div style="display:flex;align-items:center;justify-content:space-between;padding:.42rem 0;border-bottom:1px solid var(--border);gap:.8rem">'
       + '<div><div style="font-size:.81rem;color:var(--text2)">'+label+'</div>'+(sub?'<div style="font-size:.68rem;color:var(--text3);margin-top:1px">'+sub+'</div>':'')+'</div>'
       + '<label style="position:relative;width:34px;height:19px;flex-shrink:0;cursor:pointer">'
-        + '<input type="checkbox" '+(checked?'checked':'')+' onchange="toast('Paramètre mis à jour','ok')" style="opacity:0;width:0;height:0;position:absolute">'
+        + '<input type="checkbox" '+(checked?'checked':'')+' onchange="toast(\'Paramètre mis à jour\',\'ok\')" style="opacity:0;width:0;height:0;position:absolute">'
         + '<div style="position:absolute;inset:0;background:'+(checked?'var(--sage)':'var(--surface3)')+';border-radius:9px;border:1px solid '+(checked?'var(--sage)':'var(--border2)')+';transition:background .2s"></div>'
         + '<div style="position:absolute;top:3px;'+(checked?'left:17px':'left:3px')+';width:11px;height:11px;border-radius:50%;background:'+(checked?'white':'var(--text3)')+';transition:left .2s;pointer-events:none"></div>'
       + '</label></div>';
   };
 
   var settingsHTML = '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">'
-    + '<div style="padding:.85rem 1.2rem;border-bottom:1px solid var(--border);font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:500;color:var(--text)">⚙️ Paramètres des alertes</div>'
+    + '<div style="padding:.85rem 1.2rem;border-bottom:1px solid var(--border);font-family:Cormorant Garamond,serif;font-size:1rem;font-weight:500;color:var(--text)">⚙️ Paramètres des alertes</div>'
     + '<div style="padding:.75rem 1.2rem;border-bottom:1px solid var(--border)">'
-      + '<div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--text3);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.55rem">Échéances judiciaires</div>'
+      + '<div style="font-family:JetBrains Mono,monospace;font-size:.58rem;color:var(--text3);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.55rem">Échéances judiciaires</div>'
       + toggleRow('Rappel 30 jours avant','30j avant',true)
       + toggleRow('Rappel 7 jours avant','1 sem avant',true)
       + toggleRow('Rappel 48h avant','48h avant',true)
       + toggleRow('Rappel le jour même','Jour J',true)
     + '</div>'
     + '<div style="padding:.75rem 1.2rem;border-bottom:1px solid var(--border)">'
-      + '<div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--text3);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.55rem">Saisie de temps</div>'
+      + '<div style="font-family:JetBrains Mono,monospace;font-size:.58rem;color:var(--text3);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.55rem">Saisie de temps</div>'
       + toggleRow('Aucune saisie depuis 3 jours','',true)
       + toggleRow('Alerte entrée non facturée > 7j','',true)
       + toggleRow('Résumé hebdomadaire (lundi 8h)','',false)
     + '</div>'
     + '<div style="padding:.75rem 1.2rem;border-bottom:1px solid var(--border)">'
-      + '<div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--text3);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.55rem">Canal de livraison</div>'
-      + toggleRow('Notification dans l'app','',true)
+      + '<div style="font-family:JetBrains Mono,monospace;font-size:.58rem;color:var(--text3);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.55rem">Canal de livraison</div>'
+      + toggleRow('Notification dans l\'app','',true)
       + toggleRow('Courriel','',true)
       + toggleRow('SMS (Twilio)','Nécessite configuration',false)
-      + '<div style="margin-top:.6rem"><div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Courriel de notification</div>'
-      + '<input type="email" placeholder="vous@lamy-avocats.ca" style="border:1px solid var(--border2);border-radius:var(--r);padding:.55rem .8rem;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--text);background:var(--surface2);outline:none;width:100%"></div>'
+      + '<div style="margin-top:.6rem"><div style="font-family:JetBrains Mono,monospace;font-size:.58rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Courriel de notification</div>'
+      + '<input type="email" placeholder="vous@lamy-avocats.ca" style="border:1px solid var(--border2);border-radius:var(--r);padding:.55rem .8rem;font-family:JetBrains Mono,monospace;font-size:.78rem;color:var(--text);background:var(--surface2);outline:none;width:100%"></div>'
     + '</div>'
-    + '<button onclick="toast('✓ Paramètres sauvegardés','ok')" style="display:flex;align-items:center;justify-content:center;padding:.72rem;background:var(--gold);color:var(--bg);border:none;border-radius:var(--r);font-family:'Outfit',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;width:calc(100% - 2.4rem);margin:1rem 1.2rem;transition:all .2s">Sauvegarder les paramètres</button>'
+    + '<button onclick="toast(\'✓ Paramètres sauvegardés\',\'ok\')" style="display:flex;align-items:center;justify-content:center;padding:.72rem;background:var(--gold);color:var(--bg);border:none;border-radius:var(--r);font-family:Outfit,sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;width:calc(100% - 2.4rem);margin:1rem 1.2rem;transition:all .2s">Sauvegarder les paramètres</button>'
     + '</div>';
 
   document.getElementById('page-notifications').innerHTML =
     '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.6rem">'
       + '<div style="display:flex;gap:.4rem;flex-wrap:wrap">'+filtersHTML+'</div>'
-      + '<button onclick="toast('Toutes marquées comme lues','ok')" style="padding:.32rem .8rem;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);color:var(--text2);font-family:'Outfit',sans-serif;font-size:.75rem;cursor:pointer">Tout marquer lu</button>'
+      + '<button onclick="toast(\'Toutes marquées comme lues\',\'ok\')" style="padding:.32rem .8rem;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);color:var(--text2);font-family:Outfit,sans-serif;font-size:.75rem;cursor:pointer">Tout marquer lu</button>'
     + '</div>'
     + '<div style="display:grid;grid-template-columns:1fr 300px;gap:1.2rem;align-items:start">'
       + '<div>'+feedHTML+'</div>'
@@ -1180,22 +1183,22 @@ function renderNotes(){
 
   document.getElementById('page-notes').innerHTML=`<div style="display:grid;grid-template-columns:240px 1fr;gap:1.1rem;align-items:start;min-height:500px">
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
-      <div style="padding:.75rem 1rem;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--text3);letter-spacing:.12em;text-transform:uppercase">Dossiers</div>
+      <div style="padding:.75rem 1rem;border-bottom:1px solid var(--border);font-family:JetBrains Mono,monospace;font-size:.6rem;color:var(--text3);letter-spacing:.12em;text-transform:uppercase">Dossiers</div>
       ${myDos.map(d=>{var n=NOTES_DATA[d];var preview=n.contenu.replace(/\*\*/g,'').split('\n')[0].slice(0,35);return `<div onclick="switchNote('${d}')" id="dnote-${d}" style="padding:.75rem 1rem;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;${d===activeDos?'background:var(--gold-glow);border-left:2px solid var(--gold)':''}" onmouseover="if('${d}'!==window._activeDos)this.style.background='var(--surface2)'" onmouseout="if('${d}'!==window._activeDos)this.style.background=''">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:500;color:${d===activeDos?'var(--gold)':'var(--text2)'}">${d}</div>
+        <div style="font-family:JetBrains Mono,monospace;font-size:.75rem;font-weight:500;color:${d===activeDos?'var(--gold)':'var(--text2)'}">${d}</div>
         <div style="font-size:.68rem;color:var(--text3);margin-top:1px">${n.avocat.replace('Me ','')}</div>
         <div style="font-size:.7rem;color:var(--text3);margin-top:2px;font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${preview}…</div>
       </div>`;}).join('')}
     </div>
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);display:flex;flex-direction:column;min-height:500px">
       <div style="padding:.9rem 1.2rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
-        <span style="font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:500;color:var(--gold);background:var(--gold-glow);border:1px solid rgba(201,168,76,.15);padding:.22rem .55rem;border-radius:3px" id="noteTag">${activeDos}</span>
+        <span style="font-family:JetBrains Mono,monospace;font-size:.78rem;font-weight:500;color:var(--gold);background:var(--gold-glow);border:1px solid rgba(201,168,76,.15);padding:.22rem .55rem;border-radius:3px" id="noteTag">${activeDos}</span>
         <div style="display:flex;align-items:center;gap:.5rem">
-          <span style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--sage);opacity:0;transition:opacity .3s" id="noteSavedLbl">✓ Sauvegardé</span>
-          <button style="padding:.35rem .9rem;border-radius:var(--r);background:var(--gold);border:none;color:var(--bg);font-family:'Outfit',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer" onclick="saveNote()">Sauvegarder</button>
+          <span style="font-family:JetBrains Mono,monospace;font-size:.58rem;color:var(--sage);opacity:0;transition:opacity .3s" id="noteSavedLbl">✓ Sauvegardé</span>
+          <button style="padding:.35rem .9rem;border-radius:var(--r);background:var(--gold);border:none;color:var(--bg);font-family:Outfit,sans-serif;font-size:.78rem;font-weight:600;cursor:pointer" onclick="saveNote()">Sauvegarder</button>
         </div>
       </div>
-      <textarea id="noteArea" style="flex:1;border:none;background:transparent;color:var(--text);font-family:'Outfit',sans-serif;font-size:.87rem;line-height:1.75;padding:1.2rem 1.4rem;resize:none;outline:none;min-height:420px">${NOTES_DATA[activeDos]?.contenu||''}</textarea>
+      <textarea id="noteArea" style="flex:1;border:none;background:transparent;color:var(--text);font-family:Outfit,sans-serif;font-size:.87rem;line-height:1.75;padding:1.2rem 1.4rem;resize:none;outline:none;min-height:420px">${NOTES_DATA[activeDos]?.contenu||''}</textarea>
     </div>
   </div>`;
   window._activeDos=activeDos;
@@ -1251,10 +1254,10 @@ function buildAccueilHTML(){
   var stepsHTML = steps.map((s,i)=>{
     var n=i+1, st=n<_accueilStep?'done':n===_accueilStep?'active':'pending';
     var circle = st==='done'
-      ? `<div style="width:30px;height:30px;border-radius:50%;background:var(--sage);border:2px solid var(--sage);display:flex;align-items:center;justify-content:center;color:white;font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:700;flex-shrink:0">✓</div>`
+      ? `<div style="width:30px;height:30px;border-radius:50%;background:var(--sage);border:2px solid var(--sage);display:flex;align-items:center;justify-content:center;color:white;font-family:JetBrains Mono,monospace;font-size:.7rem;font-weight:700;flex-shrink:0">✓</div>`
       : st==='active'
-      ? `<div style="width:30px;height:30px;border-radius:50%;background:var(--gold-dim);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;color:var(--gold);font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:700;flex-shrink:0">${n}</div>`
-      : `<div style="width:30px;height:30px;border-radius:50%;background:transparent;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;color:var(--text3);font-family:'JetBrains Mono',monospace;font-size:.7rem;flex-shrink:0">${n}</div>`;
+      ? `<div style="width:30px;height:30px;border-radius:50%;background:var(--gold-dim);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;color:var(--gold);font-family:JetBrains Mono,monospace;font-size:.7rem;font-weight:700;flex-shrink:0">${n}</div>`
+      : `<div style="width:30px;height:30px;border-radius:50%;background:transparent;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;color:var(--text3);font-family:JetBrains Mono,monospace;font-size:.7rem;flex-shrink:0">${n}</div>`;
     var lbl = `<div style="font-size:.77rem;font-weight:500;color:${st==='done'?'var(--sage)':st==='active'?'var(--gold)':'var(--text3)'}">${s}</div>`;
     var line = i<3 ? `<div style="flex:1;height:1px;background:${n<_accueilStep?'var(--sage)':'var(--border)'};margin:0 .5rem"></div>` : '';
     return `<div style="display:flex;align-items:center;gap:.5rem">${circle}${lbl}</div>${line}`;
@@ -1275,59 +1278,59 @@ function buildStep1(){
       <div style="width:8px;height:8px;border-radius:50%;background:var(--sage);flex-shrink:0"></div>
       <div style="flex:1">
         <div style="font-size:.84rem;font-weight:500;color:${_accueilData.clientExisting===i?'var(--gold)':'var(--text)'}">${c.name}</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--text3);margin-top:2px">${c.dossier} · ${c.avocat} · ${c.count} dossier${c.count>1?'s':''} actif${c.count>1?'s':''}</div>
+        <div style="font-family:JetBrains Mono,monospace;font-size:.66rem;color:var(--text3);margin-top:2px">${c.dossier} · ${c.avocat} · ${c.count} dossier${c.count>1?'s':''} actif${c.count>1?'s':''}</div>
       </div>
-      <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--text3)">depuis ${c.since}</div>
+      <div style="font-family:JetBrains Mono,monospace;font-size:.65rem;color:var(--text3)">depuis ${c.since}</div>
     </div>`).join('');
 
   return `<div class="card card-accent" style="margin-bottom:1rem">
-    <div style="font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:500;color:var(--text);margin-bottom:.25rem">Identification du client</div>
+    <div style="font-family:Cormorant Garamond,serif;font-size:1.05rem;font-weight:500;color:var(--text);margin-bottom:.25rem">Identification du client</div>
     <div style="font-size:.75rem;color:var(--text3);font-style:italic;margin-bottom:1.2rem">Recherchez un client existant ou créez-en un nouveau</div>
 
     <div style="display:flex;gap:.6rem;margin-bottom:1rem">
       <div style="flex:1;display:flex;align-items:center;gap:.5rem;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);padding:.58rem .85rem">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
         <input type="text" id="clientSearch" placeholder="Rechercher par nom…" oninput="filterClients(this.value)"
-          style="border:none;background:none;color:var(--text);font-family:'Outfit',sans-serif;font-size:.83rem;outline:none;flex:1">
+          style="border:none;background:none;color:var(--text);font-family:Outfit,sans-serif;font-size:.83rem;outline:none;flex:1">
       </div>
-      <button onclick="toggleNewClientForm()" style="padding:.58rem 1rem;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2);font-family:'Outfit',sans-serif;font-size:.8rem;cursor:pointer;transition:all .2s;white-space:nowrap">
+      <button onclick="toggleNewClientForm()" style="padding:.58rem 1rem;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2);font-family:Outfit,sans-serif;font-size:.8rem;cursor:pointer;transition:all .2s;white-space:nowrap">
         + Nouveau client
       </button>
     </div>
 
     <div id="existingClientsList">
-      <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.6rem">Clients récents</div>
+      <div style="font-family:JetBrains Mono,monospace;font-size:.6rem;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.6rem">Clients récents</div>
       ${clientRows}
     </div>
 
     <div id="newClientForm" style="display:none;border-top:1px solid var(--border);margin-top:1rem;padding-top:1rem">
-      <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.8rem">Nouveau client</div>
+      <div style="font-family:JetBrains Mono,monospace;font-size:.6rem;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.8rem">Nouveau client</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:.9rem">
         <div style="grid-column:1/-1">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Type de client</div>
+          <div style="font-family:JetBrains Mono,monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Type de client</div>
           <div style="display:flex;gap:.5rem">
             ${['Personne morale','Personne physique'].map(t=>`<div onclick="setClientType('${t}',this)" style="padding:.38rem .9rem;border:1px solid ${_accueilData.clientType==='morale'&&t==='Personne morale'||_accueilData.clientType==='physique'&&t==='Personne physique'?'var(--gold)':'var(--border2)'};border-radius:20px;font-size:.78rem;cursor:pointer;transition:all .2s;color:${_accueilData.clientType==='morale'&&t==='Personne morale'||_accueilData.clientType==='physique'&&t==='Personne physique'?'var(--gold)':'var(--text2)'};background:${_accueilData.clientType==='morale'&&t==='Personne morale'||_accueilData.clientType==='physique'&&t==='Personne physique'?'var(--gold-dim)':'var(--surface2)'}">${t}</div>`).join('')}
           </div>
         </div>
         <div style="grid-column:1/-1">
-          <div class="flbl" style="font-family:'JetBrains Mono',monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Nom / Dénomination sociale *</div>
-          <input id="newClientNom" type="text" value="${_accueilData.clientNom}" oninput="_accueilData.clientNom=this.value" placeholder="Ex. : Distributions Laroche ltée" style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--text);background:var(--surface2);outline:none;width:100%">
+          <div class="flbl" style="font-family:JetBrains Mono,monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Nom / Dénomination sociale *</div>
+          <input id="newClientNom" type="text" value="${_accueilData.clientNom}" oninput="_accueilData.clientNom=this.value" placeholder="Ex. : Distributions Laroche ltée" style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:JetBrains Mono,monospace;font-size:.82rem;color:var(--text);background:var(--surface2);outline:none;width:100%">
         </div>
         <div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Courriel *</div>
-          <input id="newClientEmail" type="email" value="${_accueilData.clientEmail}" oninput="_accueilData.clientEmail=this.value" placeholder="contact@entreprise.ca" style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--text);background:var(--surface2);outline:none;width:100%">
+          <div style="font-family:JetBrains Mono,monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Courriel *</div>
+          <input id="newClientEmail" type="email" value="${_accueilData.clientEmail}" oninput="_accueilData.clientEmail=this.value" placeholder="contact@entreprise.ca" style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:JetBrains Mono,monospace;font-size:.82rem;color:var(--text);background:var(--surface2);outline:none;width:100%">
         </div>
         <div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Téléphone</div>
-          <input id="newClientTel" type="tel" value="${_accueilData.clientTel}" oninput="_accueilData.clientTel=this.value" placeholder="418 555-0000" style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--text);background:var(--surface2);outline:none;width:100%">
+          <div style="font-family:JetBrains Mono,monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Téléphone</div>
+          <input id="newClientTel" type="tel" value="${_accueilData.clientTel}" oninput="_accueilData.clientTel=this.value" placeholder="418 555-0000" style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:JetBrains Mono,monospace;font-size:.82rem;color:var(--text);background:var(--surface2);outline:none;width:100%">
         </div>
         <div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">NEQ (si applicable)</div>
-          <input type="text" placeholder="1234567890" style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--text);background:var(--surface2);outline:none;width:100%">
+          <div style="font-family:JetBrains Mono,monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">NEQ (si applicable)</div>
+          <input type="text" placeholder="1234567890" style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:JetBrains Mono,monospace;font-size:.82rem;color:var(--text);background:var(--surface2);outline:none;width:100%">
         </div>
         <div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Représentant principal</div>
-          <input type="text" placeholder="Nom du signataire" style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--text);background:var(--surface2);outline:none;width:100%">
+          <div style="font-family:JetBrains Mono,monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Représentant principal</div>
+          <input type="text" placeholder="Nom du signataire" style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:JetBrains Mono,monospace;font-size:.82rem;color:var(--text);background:var(--surface2);outline:none;width:100%">
         </div>
       </div>
     </div>
@@ -1342,63 +1345,63 @@ function buildStep2(){
   var partiesHTML = _accueilData.parties.map((p,i)=>`
     <div style="display:flex;align-items:center;gap:.6rem;padding:.6rem .8rem;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);margin-bottom:.4rem">
       <div style="flex:1;font-size:.84rem;color:var(--text)">${p.name}</div>
-      <span style="font-family:'JetBrains Mono',monospace;font-size:.62rem;padding:.1rem .42rem;border-radius:3px;background:${p.role==='adverse'?'var(--rust-dim)':p.role==='tiers'?'var(--amber-dim)':'var(--info-dim)'};color:${p.role==='adverse'?'#e06050':p.role==='tiers'?'#d09040':'#5090d0'}">${p.role==='adverse'?'Adverse':p.role==='tiers'?'Tiers lié':'Témoin'}</span>
+      <span style="font-family:JetBrains Mono,monospace;font-size:.62rem;padding:.1rem .42rem;border-radius:3px;background:${p.role==='adverse'?'var(--rust-dim)':p.role==='tiers'?'var(--amber-dim)':'var(--info-dim)'};color:${p.role==='adverse'?'#e06050':p.role==='tiers'?'#d09040':'#5090d0'}">${p.role==='adverse'?'Adverse':p.role==='tiers'?'Tiers lié':'Témoin'}</span>
       <button onclick="removePartyAccueil(${i})" style="width:20px;height:20px;border-radius:50%;background:none;border:1px solid var(--border2);color:var(--text3);cursor:pointer;font-size:.7rem">✕</button>
     </div>`).join('');
 
   return `<div class="card card-accent" style="margin-bottom:1rem">
-    <div style="font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:500;color:var(--text);margin-bottom:.25rem">Nature du mandat</div>
+    <div style="font-family:Cormorant Garamond,serif;font-size:1.05rem;font-weight:500;color:var(--text);margin-bottom:.25rem">Nature du mandat</div>
     <div style="font-size:.75rem;color:var(--text3);font-style:italic;margin-bottom:1.2rem">Décrivez le mandat et identifiez les parties</div>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin-bottom:1rem">
       <div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Avocat responsable *</div>
-        <select id="avocatSel" onchange="_accueilData.avocatResp=this.value"  style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--text);background:var(--surface2);outline:none;width:100%">
+        <div style="font-family:JetBrains Mono,monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Avocat responsable *</div>
+        <select id="avocatSel" onchange="_accueilData.avocatResp=this.value"  style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:JetBrains Mono,monospace;font-size:.82rem;color:var(--text);background:var(--surface2);outline:none;width:100%">
           ${(typeof allProfiles!=='undefined'&&allProfiles.length?allProfiles:[{full_name:currentProfile?currentProfile.full_name:''}]).map(a=>`<option ${_accueilData.avocatResp===(a.full_name||a.name)?'selected':''}>${a.full_name||a.name}</option>`).join('')}
         </select>
       </div>
       <div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">N° dossier (auto-généré)</div>
-        <div style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--gold);background:var(--surface2)">${_accueilData.dossierNum}</div>
+        <div style="font-family:JetBrains Mono,monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">N° dossier (auto-généré)</div>
+        <div style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:JetBrains Mono,monospace;font-size:.82rem;color:var(--gold);background:var(--surface2)">${_accueilData.dossierNum}</div>
       </div>
       <div style="grid-column:1/-1">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.4rem">Domaine de droit *</div>
+        <div style="font-family:JetBrains Mono,monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.4rem">Domaine de droit *</div>
         <div style="display:flex;flex-wrap:wrap;gap:.4rem">
           ${domaineOpts.map(d=>`<div onclick="setDomaine('${d}',this)" style="padding:.36rem .85rem;border:1px solid ${_accueilData.domaine===d?'var(--gold)':'var(--border2)'};border-radius:20px;font-size:.78rem;cursor:pointer;transition:all .2s;color:${_accueilData.domaine===d?'var(--gold)':'var(--text2)'};background:${_accueilData.domaine===d?'var(--gold-dim)':'var(--surface2)'}">${d}</div>`).join('')}
         </div>
       </div>
       <div style="grid-column:1/-1">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Description du mandat *</div>
-        <textarea id="descMandat" oninput="_accueilData.description=this.value" placeholder="Décrivez la nature du litige ou du mandat…" style="border:1px solid var(--border2);border-radius:var(--r);padding:.65rem .85rem;font-family:'Outfit',sans-serif;font-size:.83rem;color:var(--text);background:var(--surface2);outline:none;width:100%;resize:vertical;min-height:78px;line-height:1.6">${_accueilData.description}</textarea>
+        <div style="font-family:JetBrains Mono,monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Description du mandat *</div>
+        <textarea id="descMandat" oninput="_accueilData.description=this.value" placeholder="Décrivez la nature du litige ou du mandat…" style="border:1px solid var(--border2);border-radius:var(--r);padding:.65rem .85rem;font-family:Outfit,sans-serif;font-size:.83rem;color:var(--text);background:var(--surface2);outline:none;width:100%;resize:vertical;min-height:78px;line-height:1.6">${_accueilData.description}</textarea>
       </div>
       <div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.4rem">Urgence</div>
+        <div style="font-family:JetBrains Mono,monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.4rem">Urgence</div>
         <div style="display:flex;gap:.4rem">
           ${urgenceOpts.map(u=>`<div onclick="setUrgence('${u}',this)" style="padding:.36rem .75rem;border:1px solid ${_accueilData.urgence===u?'var(--gold)':'var(--border2)'};border-radius:20px;font-size:.77rem;cursor:pointer;transition:all .2s;color:${_accueilData.urgence===u?'var(--gold)':'var(--text2)'};background:${_accueilData.urgence===u?'var(--gold-dim)':'var(--surface2)'}">${u}</div>`).join('')}
         </div>
       </div>
       <div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Budget estimé</div>
-        <input type="text" value="${_accueilData.budget}" oninput="_accueilData.budget=this.value" style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--text);background:var(--surface2);outline:none;width:100%">
+        <div style="font-family:JetBrains Mono,monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Budget estimé</div>
+        <input type="text" value="${_accueilData.budget}" oninput="_accueilData.budget=this.value" style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:JetBrains Mono,monospace;font-size:.82rem;color:var(--text);background:var(--surface2);outline:none;width:100%">
       </div>
     </div>
 
     <div style="border-top:1px solid var(--border);padding-top:1rem;margin-bottom:1rem">
-      <div style="font-family:'JetBrains Mono',monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.7rem">Parties adverses et tiers</div>
+      <div style="font-family:JetBrains Mono,monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.7rem">Parties adverses et tiers</div>
       <div id="partiesAccueilList">${partiesHTML}</div>
       <div style="display:flex;gap:.5rem;margin-top:.5rem">
-        <input type="text" id="newPartyNameA" placeholder="Nom de la partie…" style="flex:1;border:1px solid var(--border2);border-radius:var(--r);padding:.58rem .8rem;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--text);background:var(--surface2);outline:none">
-        <select id="newPartyRoleA" style="width:145px;border:1px solid var(--border2);border-radius:var(--r);padding:.58rem .7rem;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--text);background:var(--surface2);outline:none">
+        <input type="text" id="newPartyNameA" placeholder="Nom de la partie…" style="flex:1;border:1px solid var(--border2);border-radius:var(--r);padding:.58rem .8rem;font-family:JetBrains Mono,monospace;font-size:.82rem;color:var(--text);background:var(--surface2);outline:none">
+        <select id="newPartyRoleA" style="width:145px;border:1px solid var(--border2);border-radius:var(--r);padding:.58rem .7rem;font-family:JetBrains Mono,monospace;font-size:.78rem;color:var(--text);background:var(--surface2);outline:none">
           <option value="adverse">Adverse</option>
           <option value="tiers">Tiers lié</option>
           <option value="temoin">Témoin</option>
         </select>
-        <button onclick="addPartyAccueil()" style="padding:.58rem 1rem;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2);font-family:'Outfit',sans-serif;font-size:.78rem;cursor:pointer;white-space:nowrap">+ Ajouter</button>
+        <button onclick="addPartyAccueil()" style="padding:.58rem 1rem;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2);font-family:Outfit,sans-serif;font-size:.78rem;cursor:pointer;white-space:nowrap">+ Ajouter</button>
       </div>
     </div>
 
     <div style="border-top:1px solid var(--border);padding-top:1rem">
-      <div style="font-family:'JetBrains Mono',monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.5rem">Documents reçus à la consultation</div>
+      <div style="font-family:JetBrains Mono,monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.5rem">Documents reçus à la consultation</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem">
         ${docsOpts.map(d=>`<div onclick="toggleDoc('${d}',this)" style="display:flex;align-items:center;gap:.55rem;padding:.52rem .8rem;background:${_accueilData.docs.includes(d)?'var(--sage-dim)':'var(--surface2)'};border:1px solid ${_accueilData.docs.includes(d)?'rgba(74,122,68,.3)':'var(--border)'};border-radius:var(--r);cursor:pointer;transition:all .2s">
           <div style="width:14px;height:14px;border-radius:3px;border:2px solid ${_accueilData.docs.includes(d)?'var(--sage)':'var(--border2)'};background:${_accueilData.docs.includes(d)?'var(--sage)':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0">${_accueilData.docs.includes(d)?'<span style="color:white;font-size:.55rem;font-weight:700">✓</span>':''}</div>
@@ -1410,7 +1413,7 @@ function buildStep2(){
 }
 function buildStep3(){
   var partiesHTML = _accueilData.parties.map(p=>`
-    <span style="font-family:'JetBrains Mono',monospace;font-size:.7rem;padding:.2rem .55rem;border-radius:3px;background:${p.role==='adverse'?'var(--rust-dim)':'var(--amber-dim)'};color:${p.role==='adverse'?'#e06050':'#d09040'}">${p.name}</span>`).join('');
+    <span style="font-family:JetBrains Mono,monospace;font-size:.7rem;padding:.2rem .55rem;border-radius:3px;background:${p.role==='adverse'?'var(--rust-dim)':'var(--amber-dim)'};color:${p.role==='adverse'?'#e06050':'#d09040'}">${p.name}</span>`).join('');
 
   var decisions = [
     {v:'waived', l:'Obtenir renonciations écrites', c:'var(--amber)'},
@@ -1425,13 +1428,13 @@ function buildStep3(){
   var w = warnContent[_accueilData.conflitDecision] || warnContent.waived;
 
   return `<div class="card card-accent" style="margin-bottom:1rem">
-    <div style="font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:500;color:var(--text);margin-bottom:.25rem">Vérification automatique des conflits</div>
+    <div style="font-family:Cormorant Garamond,serif;font-size:1.05rem;font-weight:500;color:var(--text);margin-bottom:.25rem">Vérification automatique des conflits</div>
     <div style="font-size:.75rem;color:var(--text3);font-style:italic;margin-bottom:1rem">Résultats basés sur les parties saisies à l'étape précédente</div>
 
     <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:.9rem 1.1rem;margin-bottom:1rem">
-      <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.55rem">Parties vérifiées</div>
+      <div style="font-family:JetBrains Mono,monospace;font-size:.6rem;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.55rem">Parties vérifiées</div>
       <div style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.3rem">
-        <span style="font-family:'JetBrains Mono',monospace;font-size:.7rem;padding:.2rem .55rem;border-radius:3px;background:var(--info-dim);color:#5090d0">
+        <span style="font-family:JetBrains Mono,monospace;font-size:.7rem;padding:.2rem .55rem;border-radius:3px;background:var(--info-dim);color:#5090d0">
           ${_accueilData.clientExisting!==null?_existingClients[_accueilData.clientExisting].name:(_accueilData.clientNom||'Nouveau client')} — Client
         </span>
         ${partiesHTML}
@@ -1450,17 +1453,17 @@ function buildStep3(){
           <div style="font-size:.86rem;font-weight:600;color:#e06050;margin-bottom:.3rem">2 conflits détectés — action requise</div>
           <div style="background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:.7rem .9rem;margin-bottom:.5rem;border-left:3px solid var(--urgent)">
             <div style="font-size:.82rem;font-weight:500;color:var(--text);margin-bottom:.2rem">Groupe Beauchamp inc. — Conflit élevé</div>
-            <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--text3)">Dossier 22006-001 · Me Vaillancourt · Actif · Art. 62 Code déontologie</div>
+            <div style="font-family:JetBrains Mono,monospace;font-size:.65rem;color:var(--text3)">Dossier 22006-001 · Me Vaillancourt · Actif · Art. 62 Code déontologie</div>
           </div>
           <div style="background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:.7rem .9rem;border-left:3px solid var(--warning)">
             <div style="font-size:.82rem;font-weight:500;color:var(--text);margin-bottom:.2rem">Fiducie Morin-Beauchamp — Conflit modéré</div>
-            <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--text3)">Dossier 23001-002 · Me Côté · Actif · Art. 62 al. 2</div>
+            <div style="font-family:JetBrains Mono,monospace;font-size:.65rem;color:var(--text3)">Dossier 23001-002 · Me Côté · Actif · Art. 62 al. 2</div>
           </div>
         </div>
       </div>
 
       <div style="margin-bottom:1rem">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.55rem">Décision *</div>
+        <div style="font-family:JetBrains Mono,monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.55rem">Décision *</div>
         <div style="display:flex;flex-direction:column;gap:.4rem">
           ${decisions.map(d=>`<div onclick="setConflitDecision('${d.v}')" style="display:flex;align-items:center;gap:.7rem;padding:.65rem .9rem;border:1px solid ${_accueilData.conflitDecision===d.v?d.c:'var(--border2)'};border-radius:var(--r);cursor:pointer;transition:all .2s;background:${_accueilData.conflitDecision===d.v?'rgba(0,0,0,.04)':'var(--surface2)'}">
             <div style="width:16px;height:16px;border-radius:50%;border:2px solid ${_accueilData.conflitDecision===d.v?d.c:'var(--border2)'};background:${_accueilData.conflitDecision===d.v?d.c:'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0">${_accueilData.conflitDecision===d.v?'<div style="width:6px;height:6px;border-radius:50%;background:white"></div>':''}</div>
@@ -1475,8 +1478,8 @@ function buildStep3(){
       </div>
 
       <div style="margin-top:.9rem">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.4rem">Notes sur la gestion du conflit</div>
-        <textarea placeholder="Documenter les discussions et justifications…" style="border:1px solid var(--border2);border-radius:var(--r);padding:.65rem .85rem;font-family:'Outfit',sans-serif;font-size:.82rem;color:var(--text);background:var(--surface2);outline:none;width:100%;resize:vertical;min-height:65px;line-height:1.6"></textarea>
+        <div style="font-family:JetBrains Mono,monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.4rem">Notes sur la gestion du conflit</div>
+        <textarea placeholder="Documenter les discussions et justifications…" style="border:1px solid var(--border2);border-radius:var(--r);padding:.65rem .85rem;font-family:Outfit,sans-serif;font-size:.82rem;color:var(--text);background:var(--surface2);outline:none;width:100%;resize:vertical;min-height:65px;line-height:1.6"></textarea>
       </div>
     </div>
   </div>`;
@@ -1497,8 +1500,8 @@ function buildStep4(){
     <div style="background:var(--sage-dim);border:1px solid rgba(74,122,68,.3);border-radius:var(--r);padding:1.3rem 1.5rem;display:flex;align-items:flex-start;gap:1rem;margin-bottom:1.2rem">
       <div style="font-size:1.8rem;flex-shrink:0;line-height:1">✓</div>
       <div>
-        <div style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:500;color:#6ab864;margin-bottom:.3rem">Dossier prêt à ouvrir</div>
-        <div style="font-size:.82rem;color:var(--text2);line-height:1.6">Révisez les informations ci-dessous avant de confirmer l'ouverture officielle du dossier <strong style="color:var(--gold);font-family:'JetBrains Mono',monospace">${_accueilData.dossierNum}</strong>.</div>
+        <div style="font-family:Cormorant Garamond,serif;font-size:1.2rem;font-weight:500;color:#6ab864;margin-bottom:.3rem">Dossier prêt à ouvrir</div>
+        <div style="font-size:.82rem;color:var(--text2);line-height:1.6">Révisez les informations ci-dessous avant de confirmer l'ouverture officielle du dossier <strong style="color:var(--gold);font-family:JetBrains Mono,monospace">${_accueilData.dossierNum}</strong>.</div>
       </div>
     </div>
 
@@ -1509,26 +1512,26 @@ function buildStep4(){
         {t:`Parties (${_accueilData.parties.length+1})`,rows:[[`Client`,clientName],..._accueilData.parties.map(p=>[p.role==='adverse'?'Adverse':'Tiers',p.name])]},
         {t:'Conflits & Décision',rows:[['Vérification','VRF-2026-0090','gold'],['Conflits détectés','2 (élevé + modéré)','warn'],['Décision',_accueilData.conflitDecision==='waived'?'Renonciations':_accueilData.conflitDecision==='refused'?'Refus':'Soumis à admin']]},
       ].map(b=>`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:1rem 1.1rem">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--text3);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.7rem">${b.t}</div>
+        <div style="font-family:JetBrains Mono,monospace;font-size:.58rem;color:var(--text3);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.7rem">${b.t}</div>
         ${b.rows.map(([l,v,c])=>`<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem;margin-bottom:.38rem;font-size:.81rem"><span style="color:var(--text3)">${l}</span><span style="font-weight:500;text-align:right;color:${c==='gold'?'var(--gold)':c==='warn'?'var(--warning)':'var(--text)'}">${v}</span></div>`).join('')}
       </div>`).join('')}
     </div>
 
     <div class="card" style="margin-bottom:1rem">
-      <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.8rem">Actions déclenchées automatiquement</div>
+      <div style="font-family:JetBrains Mono,monospace;font-size:.6rem;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.8rem">Actions déclenchées automatiquement</div>
       <div style="display:flex;flex-direction:column;gap:.45rem">
         ${actions.map((a,i)=>`<div style="display:flex;align-items:center;gap:.7rem;font-size:.8rem;color:var(--text2)">
-          <div style="width:20px;height:20px;border-radius:50%;background:var(--gold-dim);border:1px solid rgba(201,168,76,.2);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--gold);flex-shrink:0;font-weight:600">${i+1}</div>${a}</div>`).join('')}
+          <div style="width:20px;height:20px;border-radius:50%;background:var(--gold-dim);border:1px solid rgba(201,168,76,.2);display:flex;align-items:center;justify-content:center;font-family:JetBrains Mono,monospace;font-size:.62rem;color:var(--gold);flex-shrink:0;font-weight:600">${i+1}</div>${a}</div>`).join('')}
       </div>
     </div>`;
 }
 function buildAccueilNav(){
   var backBtn = _accueilStep > 1
-    ? `<button onclick="accueilStep(${_accueilStep-1})" style="padding:.72rem 1.4rem;background:var(--surface2);color:var(--text2);border:1px solid var(--border2);border-radius:var(--r);font-family:'Outfit',sans-serif;font-size:.83rem;font-weight:500;cursor:pointer">← Retour</button>`
+    ? `<button onclick="accueilStep(${_accueilStep-1})" style="padding:.72rem 1.4rem;background:var(--surface2);color:var(--text2);border:1px solid var(--border2);border-radius:var(--r);font-family:Outfit,sans-serif;font-size:.83rem;font-weight:500;cursor:pointer">← Retour</button>`
     : '<div></div>';
   var nextBtn = _accueilStep < 4
-    ? `<button onclick="accueilNextStep()" style="padding:.72rem 1.6rem;background:var(--gold);color:var(--bg);border:none;border-radius:var(--r);font-family:'Outfit',sans-serif;font-size:.84rem;font-weight:600;cursor:pointer">Suivant →</button>`
-    : `<button id="btnConfirmOpen" onclick="confirmDossierOpen()" style="display:flex;align-items:center;gap:.5rem;padding:.82rem 1.8rem;background:var(--gold);color:var(--bg);border:none;border-radius:var(--r);font-family:'Outfit',sans-serif;font-size:.86rem;font-weight:600;cursor:pointer">
+    ? `<button onclick="accueilNextStep()" style="padding:.72rem 1.6rem;background:var(--gold);color:var(--bg);border:none;border-radius:var(--r);font-family:Outfit,sans-serif;font-size:.84rem;font-weight:600;cursor:pointer">Suivant →</button>`
+    : `<button id="btnConfirmOpen" onclick="confirmDossierOpen()" style="display:flex;align-items:center;gap:.5rem;padding:.82rem 1.8rem;background:var(--gold);color:var(--bg);border:none;border-radius:var(--r);font-family:Outfit,sans-serif;font-size:.86rem;font-weight:600;cursor:pointer">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>
         Confirmer l'ouverture du dossier
       </button>`;
@@ -1617,67 +1620,67 @@ function renderConflits(){
   var roleLabels={client:'Client',adverse:'Partie adverse',tiers:'Tiers lié'};
 
   var tabsHTML = ['verification','registre','parametres'].map(t=>`
-    <div onclick="setConflitTab('${t}')" style="padding:.7rem 1.2rem;font-size:.82rem;cursor:pointer;color:${_conflitTab===t?'var(--gold)':'var(--text3)'};border-bottom:2px solid ${_conflitTab===t?'var(--gold)':'transparent'};transition:all .2s;font-family:'Outfit',sans-serif;font-weight:${_conflitTab===t?'500':'400'}">
+    <div onclick="setConflitTab('${t}')" style="padding:.7rem 1.2rem;font-size:.82rem;cursor:pointer;color:${_conflitTab===t?'var(--gold)':'var(--text3)'};border-bottom:2px solid ${_conflitTab===t?'var(--gold)':'transparent'};transition:all .2s;font-family:Outfit,sans-serif;font-weight:${_conflitTab===t?'500':'400'}">
       ${{verification:'🔍 Vérification',registre:'📋 Registre',parametres:'⚙️ Paramètres'}[t]}
     </div>`).join('');
 
   var partiesChipsHTML = _conflitParties.map((p,i)=>`
-    <span style="font-family:'JetBrains Mono',monospace;font-size:.7rem;padding:.22rem .55rem;border-radius:3px;background:${roleColors[p.role]}">${p.name} — ${roleLabels[p.role]}</span>`).join('');
+    <span style="font-family:JetBrains Mono,monospace;font-size:.7rem;padding:.22rem .55rem;border-radius:3px;background:${roleColors[p.role]}">${p.name} — ${roleLabels[p.role]}</span>`).join('');
 
   var verificationHTML = `
     <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);padding:1.4rem;margin-bottom:1.2rem;position:relative;overflow:hidden">
       <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--gold2))"></div>
-      <div style="font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:500;color:var(--text);margin-bottom:.25rem">Nouvelle vérification</div>
+      <div style="font-family:Cormorant Garamond,serif;font-size:1.05rem;font-weight:500;color:var(--text);margin-bottom:.25rem">Nouvelle vérification</div>
       <div style="font-size:.73rem;color:var(--text3);font-style:italic;margin-bottom:1.1rem">Obligation déontologique — Art. 62 Code de déontologie des avocats</div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin-bottom:1rem">
         <div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Numéro de dossier</div>
-          <input type="text" id="conflitDossierInp" value="${_conflitDossierNum}" oninput="_conflitDossierNum=this.value" style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--text);background:var(--surface);outline:none;width:100%">
+          <div style="font-family:JetBrains Mono,monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Numéro de dossier</div>
+          <input type="text" id="conflitDossierInp" value="${_conflitDossierNum}" oninput="_conflitDossierNum=this.value" style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:JetBrains Mono,monospace;font-size:.82rem;color:var(--text);background:var(--surface);outline:none;width:100%">
         </div>
         <div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Avocat responsable</div>
-          <select style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--text);background:var(--surface);outline:none;width:100%">
+          <div style="font-family:JetBrains Mono,monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Avocat responsable</div>
+          <select style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:JetBrains Mono,monospace;font-size:.82rem;color:var(--text);background:var(--surface);outline:none;width:100%">
             ${(typeof allProfiles!=='undefined'?allProfiles:[]).map(a=>`<option>${a.name}</option>`).join('')}
           </select>
         </div>
         <div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Type de dossier</div>
-          <select style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--text);background:var(--surface);outline:none;width:100%">
+          <div style="font-family:JetBrains Mono,monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Type de dossier</div>
+          <select style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:JetBrains Mono,monospace;font-size:.82rem;color:var(--text);background:var(--surface);outline:none;width:100%">
             ${['Droit civil — litige','Droit des affaires','Droit de la famille','Droit immobilier','Droit du travail','Droit criminel'].map(t=>`<option>${t}</option>`).join('')}
           </select>
         </div>
         <div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Date d'ouverture</div>
-          <input type="date" value="2026-03-21" style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--text);background:var(--surface);outline:none;width:100%">
+          <div style="font-family:JetBrains Mono,monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Date d'ouverture</div>
+          <input type="date" value="2026-03-21" style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:JetBrains Mono,monospace;font-size:.82rem;color:var(--text);background:var(--surface);outline:none;width:100%">
         </div>
         <div style="grid-column:1/-1">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Description sommaire</div>
-          <textarea style="border:1px solid var(--border2);border-radius:var(--r);padding:.65rem .85rem;font-family:'Outfit',sans-serif;font-size:.82rem;color:var(--text);background:var(--surface);outline:none;width:100%;resize:vertical;min-height:65px;line-height:1.6">Litige commercial — résiliation de contrat de distribution exclusive.</textarea>
+          <div style="font-family:JetBrains Mono,monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Description sommaire</div>
+          <textarea style="border:1px solid var(--border2);border-radius:var(--r);padding:.65rem .85rem;font-family:Outfit,sans-serif;font-size:.82rem;color:var(--text);background:var(--surface);outline:none;width:100%;resize:vertical;min-height:65px;line-height:1.6">Litige commercial — résiliation de contrat de distribution exclusive.</textarea>
         </div>
       </div>
 
       <div style="margin-bottom:.8rem">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.55rem">Parties impliquées</div>
+        <div style="font-family:JetBrains Mono,monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.55rem">Parties impliquées</div>
         <div id="conflitPartiesList">
           ${_conflitParties.map((p,i)=>`<div style="display:flex;align-items:center;gap:.6rem;padding:.58rem .8rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:.38rem">
             <div style="flex:1;font-size:.83rem;color:var(--text)">${p.name}</div>
-            <span style="font-family:'JetBrains Mono',monospace;font-size:.62rem;padding:.1rem .42rem;border-radius:3px;background:${roleColors[p.role]}">${roleLabels[p.role]}</span>
+            <span style="font-family:JetBrains Mono,monospace;font-size:.62rem;padding:.1rem .42rem;border-radius:3px;background:${roleColors[p.role]}">${roleLabels[p.role]}</span>
             <button onclick="removeConflitParty(${i})" style="width:20px;height:20px;border-radius:50%;background:none;border:1px solid var(--border2);color:var(--text3);cursor:pointer;font-size:.7rem">✕</button>
           </div>`).join('')}
         </div>
         <div style="display:flex;gap:.5rem;margin-top:.45rem">
-          <input type="text" id="conflitPartyName" placeholder="Nom de la partie…" style="flex:1;border:1px solid var(--border2);border-radius:var(--r);padding:.56rem .8rem;font-family:'JetBrains Mono',monospace;font-size:.81rem;color:var(--text);background:var(--surface);outline:none">
-          <select id="conflitPartyRole" style="width:145px;border:1px solid var(--border2);border-radius:var(--r);padding:.56rem .7rem;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--text);background:var(--surface);outline:none">
+          <input type="text" id="conflitPartyName" placeholder="Nom de la partie…" style="flex:1;border:1px solid var(--border2);border-radius:var(--r);padding:.56rem .8rem;font-family:JetBrains Mono,monospace;font-size:.81rem;color:var(--text);background:var(--surface);outline:none">
+          <select id="conflitPartyRole" style="width:145px;border:1px solid var(--border2);border-radius:var(--r);padding:.56rem .7rem;font-family:JetBrains Mono,monospace;font-size:.78rem;color:var(--text);background:var(--surface);outline:none">
             <option value="client">Client</option>
             <option value="adverse">Partie adverse</option>
             <option value="tiers">Tiers lié</option>
           </select>
-          <button onclick="addConflitParty()" style="padding:.56rem 1rem;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2);font-family:'Outfit',sans-serif;font-size:.78rem;cursor:pointer;white-space:nowrap">+ Ajouter</button>
+          <button onclick="addConflitParty()" style="padding:.56rem 1rem;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2);font-family:Outfit,sans-serif;font-size:.78rem;cursor:pointer;white-space:nowrap">+ Ajouter</button>
         </div>
       </div>
 
-      <button id="btnLancerVerif" onclick="lancerVerification()" style="display:flex;align-items:center;justify-content:center;gap:.6rem;padding:.88rem 2rem;background:var(--gold);color:var(--bg);border:none;border-radius:var(--r);font-family:'Outfit',sans-serif;font-size:.87rem;font-weight:600;cursor:pointer;width:100%;transition:all .2s">
+      <button id="btnLancerVerif" onclick="lancerVerification()" style="display:flex;align-items:center;justify-content:center;gap:.6rem;padding:.88rem 2rem;background:var(--gold);color:var(--bg);border:none;border-radius:var(--r);font-family:Outfit,sans-serif;font-size:.87rem;font-weight:600;cursor:pointer;width:100%;transition:all .2s">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         Lancer la vérification de conflits
       </button>
@@ -1688,12 +1691,12 @@ function renderConflits(){
       <div style="background:var(--urgent-dim);border:1px solid rgba(192,57,43,.35);border-radius:var(--r);padding:1.2rem 1.4rem;display:flex;align-items:flex-start;gap:1rem;margin-bottom:1.2rem">
         <div style="font-size:1.5rem">⚠️</div>
         <div style="flex:1">
-          <div style="font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:500;color:#e06050;margin-bottom:.3rem">2 conflits d'intérêts détectés</div>
+          <div style="font-family:Cormorant Garamond,serif;font-size:1.15rem;font-weight:500;color:#e06050;margin-bottom:.3rem">2 conflits d'intérêts détectés</div>
           <div style="font-size:.81rem;color:var(--text2);line-height:1.6;margin-bottom:.8rem">2 correspondances trouvées dans vos dossiers actifs. Évaluez ces conflits avant de procéder à l'ouverture du dossier.</div>
           <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-            <button onclick="toast('Formulaire de renonciation généré','ok')" style="padding:.38rem .85rem;border-radius:var(--r);background:var(--gold);color:var(--bg);border:none;font-family:'Outfit',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer">Générer renonciations</button>
-            <button onclick="toast('Rapport PDF exporté','ok')" style="padding:.38rem .85rem;border-radius:var(--r);background:transparent;color:var(--text2);border:1px solid var(--border2);font-family:'Outfit',sans-serif;font-size:.78rem;cursor:pointer">Exporter PDF</button>
-            <button onclick="toast('Dossier refusé et archivé','warn')" style="padding:.38rem .85rem;border-radius:var(--r);background:transparent;color:#e06050;border:1px solid rgba(192,57,43,.35);font-family:'Outfit',sans-serif;font-size:.78rem;cursor:pointer">Refuser le dossier</button>
+            <button onclick="toast(\'Formulaire de renonciation généré\',\'ok\')" style="padding:.38rem .85rem;border-radius:var(--r);background:var(--gold);color:var(--bg);border:none;font-family:Outfit,sans-serif;font-size:.78rem;font-weight:600;cursor:pointer">Générer renonciations</button>
+            <button onclick="toast(\'Rapport PDF exporté\',\'ok\')" style="padding:.38rem .85rem;border-radius:var(--r);background:transparent;color:var(--text2);border:1px solid var(--border2);font-family:Outfit,sans-serif;font-size:.78rem;cursor:pointer">Exporter PDF</button>
+            <button onclick="toast(\'Dossier refusé et archivé\',\'warn\')" style="padding:.38rem .85rem;border-radius:var(--r);background:transparent;color:#e06050;border:1px solid rgba(192,57,43,.35);font-family:Outfit,sans-serif;font-size:.78rem;cursor:pointer">Refuser le dossier</button>
           </div>
         </div>
       </div>
@@ -1702,33 +1705,33 @@ function renderConflits(){
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1rem 1.2rem;border-left:3px solid var(--urgent)">
           <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.8rem;margin-bottom:.45rem">
             <div style="font-size:.87rem;font-weight:500;color:var(--text)">Groupe Beauchamp inc. — partie adverse dans un dossier actif</div>
-            <span style="font-family:'JetBrains Mono',monospace;font-size:.6rem;padding:.1rem .45rem;border-radius:3px;background:var(--urgent-dim);color:#e06050;flex-shrink:0">Élevé</span>
+            <span style="font-family:JetBrains Mono,monospace;font-size:.6rem;padding:.1rem .45rem;border-radius:3px;background:var(--urgent-dim);color:#e06050;flex-shrink:0">Élevé</span>
           </div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--text3);margin-bottom:.4rem">Dossier 22006-001 · Me Vaillancourt · Actif depuis jan. 2022</div>
+          <div style="font-family:JetBrains Mono,monospace;font-size:.65rem;color:var(--text3);margin-bottom:.4rem">Dossier 22006-001 · Me Vaillancourt · Actif depuis jan. 2022</div>
           <div style="font-size:.79rem;color:var(--text2);line-height:1.5">Le cabinet représente actuellement Industries Saguenay inc. dans un litige contre Groupe Beauchamp inc. Représenter les deux parties constitue un conflit direct.</div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--text3);margin-top:.4rem">Art. 62 et 63 Code de déontologie des avocats</div>
+          <div style="font-family:JetBrains Mono,monospace;font-size:.62rem;color:var(--text3);margin-top:.4rem">Art. 62 et 63 Code de déontologie des avocats</div>
         </div>
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1rem 1.2rem;border-left:3px solid var(--warning)">
           <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.8rem;margin-bottom:.45rem">
             <div style="font-size:.87rem;font-weight:500;color:var(--text)">Fiducie Morin-Beauchamp — actionnaire lié à un client actuel</div>
-            <span style="font-family:'JetBrains Mono',monospace;font-size:.6rem;padding:.1rem .45rem;border-radius:3px;background:var(--warning-dim);color:#e09040;flex-shrink:0">Modéré</span>
+            <span style="font-family:JetBrains Mono,monospace;font-size:.6rem;padding:.1rem .45rem;border-radius:3px;background:var(--warning-dim);color:#e09040;flex-shrink:0">Modéré</span>
           </div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--text3);margin-bottom:.4rem">Dossier 23001-002 · Me Côté · Actif</div>
+          <div style="font-family:JetBrains Mono,monospace;font-size:.65rem;color:var(--text3);margin-bottom:.4rem">Dossier 23001-002 · Me Côté · Actif</div>
           <div style="font-size:.79rem;color:var(--text2);line-height:1.5">La Fiducie est co-actionnaire de Beaumont Distribution inc. (client actuel de Me Côté). Une renonciation écrite des deux parties pourrait permettre de procéder.</div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--text3);margin-top:.4rem">Art. 62 al. 2 Code de déontologie des avocats</div>
+          <div style="font-family:JetBrains Mono,monospace;font-size:.62rem;color:var(--text3);margin-top:.4rem">Art. 62 al. 2 Code de déontologie des avocats</div>
         </div>
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:.85rem 1.2rem;display:flex;align-items:center;gap:.8rem">
           <div style="width:28px;height:28px;border-radius:50%;background:var(--sage-dim);display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0">✓</div>
           <div>
             <div style="font-size:.84rem;font-weight:500;color:var(--text)">Distributions Laroche ltée — Aucun conflit</div>
-            <div style="font-family:'JetBrains Mono',monospace;font-size:.63rem;color:var(--text3);margin-top:2px">Vérifié dans 159 dossiers · Aucune correspondance trouvée</div>
+            <div style="font-family:JetBrains Mono,monospace;font-size:.63rem;color:var(--text3);margin-top:2px">Vérifié dans 159 dossiers · Aucune correspondance trouvée</div>
           </div>
         </div>
       </div>
 
       <div class="card card-accent">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--text3);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.8rem">Journal de vérification</div>
-        <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);padding:.9rem 1.1rem;font-family:'JetBrains Mono',monospace;font-size:.71rem;line-height:1.9;color:var(--text2)">
+        <div style="font-family:JetBrains Mono,monospace;font-size:.62rem;color:var(--text3);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.8rem">Journal de vérification</div>
+        <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);padding:.9rem 1.1rem;font-family:JetBrains Mono,monospace;font-size:.71rem;line-height:1.9;color:var(--text2)">
           <div><span style="color:var(--text3)">2026-03-21 14:32:07</span> · Vérification lancée par <span style="color:var(--gold)">Me Vaillancourt</span></div>
           <div><span style="color:var(--text3)">2026-03-21 14:32:07</span> · Dossier : <span style="color:var(--gold)">${_conflitDossierNum}</span> · ${_conflitParties.length} parties</div>
           <div><span style="color:var(--text3)">2026-03-21 14:32:08</span> · Recherche dans 47 dossiers actifs + 112 archivés</div>
@@ -1737,8 +1740,8 @@ function renderConflits(){
           <div><span style="color:var(--text3)">2026-03-21 14:32:08</span> · Résultat sauvegardé · ID : <span style="color:var(--gold)">VRF-2026-0090</span></div>
         </div>
         <div style="display:flex;gap:.5rem;margin-top:.8rem">
-          <button onclick="toast('Attestation PDF générée','ok')" style="padding:.35rem .85rem;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);color:var(--text2);font-family:'Outfit',sans-serif;font-size:.75rem;cursor:pointer">📄 Exporter attestation</button>
-          <button onclick="toast('Courriel envoyé','ok')" style="padding:.35rem .85rem;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);color:var(--text2);font-family:'Outfit',sans-serif;font-size:.75rem;cursor:pointer">✉️ Envoyer par courriel</button>
+          <button onclick="toast(\'Attestation PDF générée\',\'ok\')" style="padding:.35rem .85rem;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);color:var(--text2);font-family:Outfit,sans-serif;font-size:.75rem;cursor:pointer">📄 Exporter attestation</button>
+          <button onclick="toast(\'Courriel envoyé\',\'ok\')" style="padding:.35rem .85rem;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);color:var(--text2);font-family:Outfit,sans-serif;font-size:.75rem;cursor:pointer">✉️ Envoyer par courriel</button>
         </div>
       </div>
     </div>` : ''}`;
@@ -1747,30 +1750,30 @@ function renderConflits(){
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.1rem;flex-wrap:wrap;gap:.6rem">
       <div>
         <div style="font-size:.9rem;font-weight:500;color:var(--text)">Toutes les vérifications</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:.67rem;color:var(--text3);margin-top:2px">89 vérifications depuis l'ouverture du cabinet</div>
+        <div style="font-family:JetBrains Mono,monospace;font-size:.67rem;color:var(--text3);margin-top:2px">89 vérifications depuis l'ouverture du cabinet</div>
       </div>
-      <button onclick="toast('Export CSV généré','ok')" style="padding:.38rem .85rem;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);color:var(--text2);font-family:'Outfit',sans-serif;font-size:.75rem;cursor:pointer">⬇ Exporter CSV</button>
+      <button onclick="toast(\'Export CSV généré\',\'ok\')" style="padding:.38rem .85rem;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);color:var(--text2);font-family:Outfit,sans-serif;font-size:.75rem;cursor:pointer">⬇ Exporter CSV</button>
     </div>
     <div style="display:flex;gap:.6rem;margin-bottom:1rem;flex-wrap:wrap">
       <div style="flex:1;min-width:160px;display:flex;align-items:center;gap:.45rem;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);padding:.5rem .82rem">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input type="text" placeholder="Rechercher…" style="border:none;background:none;color:var(--text);font-family:'Outfit',sans-serif;font-size:.82rem;outline:none;flex:1">
+        <input type="text" placeholder="Rechercher…" style="border:none;background:none;color:var(--text);font-family:Outfit,sans-serif;font-size:.82rem;outline:none;flex:1">
       </div>
-      <select style="border:1px solid var(--border2);border-radius:var(--r);padding:.5rem .72rem;background:var(--surface2);color:var(--text2);font-family:'Outfit',sans-serif;font-size:.79rem;outline:none">
+      <select style="border:1px solid var(--border2);border-radius:var(--r);padding:.5rem .72rem;background:var(--surface2);color:var(--text2);font-family:Outfit,sans-serif;font-size:.79rem;outline:none">
         <option>Tous les résultats</option><option>Conflit détecté</option><option>Aucun conflit</option>
       </select>
     </div>
     <div class="card card-accent" style="overflow-x:auto">
       <table style="width:100%;border-collapse:collapse">
-        <thead><tr>${['ID Vérif.','Date','Dossier','Avocat','Parties','Résultat','Décision'].map(h=>`<th style="font-family:'JetBrains Mono',monospace;font-size:.57rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;padding:.55rem .75rem;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap">${h}</th>`).join('')}</tr></thead>
+        <thead><tr>${['ID Vérif.','Date','Dossier','Avocat','Parties','Résultat','Décision'].map(h=>`<th style="font-family:JetBrains Mono,monospace;font-size:.57rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;padding:.55rem .75rem;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap">${h}</th>`).join('')}</tr></thead>
         <tbody>${REGISTRE.map(r=>`<tr style="transition:background .15s" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">
-          <td style="padding:.62rem .75rem;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--gold)">${r.id}</td>
-          <td style="padding:.62rem .75rem;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--text3)">${new Date(r.date+'T12:00:00').toLocaleDateString('fr-CA',{day:'numeric',month:'short'})}</td>
-          <td style="padding:.62rem .75rem;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--text)">${r.dossier}</td>
+          <td style="padding:.62rem .75rem;border-bottom:1px solid var(--border);font-family:JetBrains Mono,monospace;font-size:.7rem;color:var(--gold)">${r.id}</td>
+          <td style="padding:.62rem .75rem;border-bottom:1px solid var(--border);font-family:JetBrains Mono,monospace;font-size:.7rem;color:var(--text3)">${new Date(r.date+'T12:00:00').toLocaleDateString('fr-CA',{day:'numeric',month:'short'})}</td>
+          <td style="padding:.62rem .75rem;border-bottom:1px solid var(--border);font-family:JetBrains Mono,monospace;font-size:.75rem;color:var(--text)">${r.dossier}</td>
           <td style="padding:.62rem .75rem;border-bottom:1px solid var(--border);font-size:.78rem;color:var(--text2)">Me ${r.avocat}</td>
-          <td style="padding:.62rem .75rem;border-bottom:1px solid var(--border)"><div style="display:flex;flex-wrap:wrap;gap:.25rem">${r.parties.slice(0,2).map((p,i)=>`<span style="font-family:'JetBrains Mono',monospace;font-size:.58rem;padding:.08rem .38rem;border-radius:3px;background:${i===0?'var(--info-dim);color:#5090d0':'var(--rust-dim);color:#e06050'}">${p.length>16?p.slice(0,14)+'…':p}</span>`).join('')}${r.parties.length>2?`<span style="font-family:'JetBrains Mono',monospace;font-size:.58rem;padding:.08rem .38rem;border-radius:3px;background:var(--surface3);color:var(--text3)">+${r.parties.length-2}</span>`:''}</div></td>
+          <td style="padding:.62rem .75rem;border-bottom:1px solid var(--border)"><div style="display:flex;flex-wrap:wrap;gap:.25rem">${r.parties.slice(0,2).map((p,i)=>`<span style="font-family:JetBrains Mono,monospace;font-size:.58rem;padding:.08rem .38rem;border-radius:3px;background:${i===0?'var(--info-dim);color:#5090d0':'var(--rust-dim);color:#e06050'}">${p.length>16?p.slice(0,14)+'…':p}</span>`).join('')}${r.parties.length>2?`<span style="font-family:JetBrains Mono,monospace;font-size:.58rem;padding:.08rem .38rem;border-radius:3px;background:var(--surface3);color:var(--text3)">+${r.parties.length-2}</span>`:''}</div></td>
           <td style="padding:.62rem .75rem;border-bottom:1px solid var(--border)">${r.resultat==='conflict'?'<span style="font-family:\'JetBrains Mono\',monospace;font-size:.58rem;padding:.1rem .38rem;border-radius:3px;background:var(--urgent-dim);color:#e06050">⚠ Conflit</span>':'<span style="font-family:\'JetBrains Mono\',monospace;font-size:.58rem;padding:.1rem .38rem;border-radius:3px;background:var(--sage-dim);color:#6ab864">✓ Aucun</span>'}</td>
-          <td style="padding:.62rem .75rem;border-bottom:1px solid var(--border)"><span style="font-family:'JetBrains Mono',monospace;font-size:.58rem;padding:.1rem .38rem;border-radius:3px;background:${decisColors[r.decision]}">${decisLabels[r.decision]}</span></td>
+          <td style="padding:.62rem .75rem;border-bottom:1px solid var(--border)"><span style="font-family:JetBrains Mono,monospace;font-size:.58rem;padding:.1rem .38rem;border-radius:3px;background:${decisColors[r.decision]}">${decisLabels[r.decision]}</span></td>
         </tr>`).join('')}</tbody>
       </table>
     </div>`;
@@ -1781,11 +1784,11 @@ function renderConflits(){
         {title:'Portée de la recherche',items:[['Dossiers actifs','Toujours inclus',true,true],['Dossiers archivés','Recommandé',true,false],['Associés et actionnaires','Ajoute 2–3 sec',true,false],['Membres de la famille','Conjoint·e, enfants',false,false]]},
         {title:'Obligations et alertes',items:[['Bloquer si conflit élevé','Approbation admin requise',true,false],['Alerte courriel','Avocat + administrateur',true,false],['Vérification obligatoire','Avant toute ouverture',true,false],['Re-vérification auto','Si nouvelle partie ajoutée',false,false]]},
       ].map(section=>`<div class="card card-accent">
-        <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:500;color:var(--text);margin-bottom:.9rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)">${section.title}</div>
+        <div style="font-family:Cormorant Garamond,serif;font-size:1rem;font-weight:500;color:var(--text);margin-bottom:.9rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)">${section.title}</div>
         ${section.items.map(([l,s,checked,disabled])=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:.48rem 0;gap:.8rem;border-bottom:1px solid var(--border)">
           <div style="flex:1"><div style="font-size:.81rem;color:var(--text2)">${l}</div><div style="font-size:.69rem;color:var(--text3);margin-top:2px">${s}</div></div>
           <label style="position:relative;width:34px;height:19px;flex-shrink:0;cursor:${disabled?'not-allowed':'pointer'}">
-            <input type="checkbox" ${checked?'checked':''} ${disabled?'disabled':''} onchange="toast('Paramètre mis à jour','ok')" style="opacity:0;width:0;height:0;position:absolute">
+            <input type="checkbox" ${checked?'checked':''} ${disabled?'disabled':''} onchange="toast(\'Paramètre mis à jour\',\'ok\')" style="opacity:0;width:0;height:0;position:absolute">
             <div style="position:absolute;inset:0;background:${checked?'var(--sage)':'var(--surface3)'};border-radius:9px;border:1px solid ${checked?'var(--sage)':'var(--border2)'};transition:background .2s"></div>
             <div style="position:absolute;top:3px;left:${checked?'17px':'3px'};width:11px;height:11px;border-radius:50%;background:${checked?'white':'var(--text3)'};transition:left .2s"></div>
           </label>
@@ -1862,8 +1865,6 @@ function buildExistingClients(){
     }
   } catch(e){}
 })();
-}
-}
 </script>
 </body>
 </html>
