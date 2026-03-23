@@ -1783,22 +1783,18 @@ function setConflitDecision(v){ _accueilData.conflitDecision=v; renderAccueil();
 
 function toggleConflitSetting(el) {
   if (!el) return;
-  var key = el.dataset ? el.dataset.key : el.getAttribute('data-key');
+  var key = el.getAttribute('data-key');
   if (!key) return;
-  var checked = el.checked;
-  _conflitSettings[key] = checked;
-  // Re-render just the toggle visuals directly
-  var bg   = el.parentNode ? el.parentNode.querySelector('[id^="tr-bg-"]') : document.getElementById('tr-bg-'+key);
-  var knob = el.parentNode ? el.parentNode.querySelector('[id^="tr-knob-"]') : document.getElementById('tr-knob-'+key);
-  if (bg) {
-    bg.style.background = checked ? 'var(--sage)' : 'var(--surface3)';
-    bg.style.borderColor = checked ? 'var(--sage)' : 'var(--border2)';
-  }
-  if (knob) {
-    knob.style.left = checked ? '17px' : '3px';
-    knob.style.background = checked ? 'white' : 'var(--text3)';
-  }
+  _conflitSettings[key] = el.checked;
   toast('Paramètre mis à jour', 'ok');
+  // Re-render the active parametres section
+  var pPage = document.getElementById('page-notifications');
+  var cPage = document.getElementById('page-conflits');
+  if (pPage && pPage.classList.contains('active')) { renderNotifs(); return; }
+  if (cPage && cPage.classList.contains('active')) { 
+    _conflitTab = 'parametres';
+    renderConflits(); 
+  }
 }
 
 function renderConflits(){
@@ -2059,7 +2055,6 @@ function buildExistingClients(){
       var tl=document.getElementById('themeLabel');if(tl)tl.textContent='☀️ Clair';
     }
   } catch(e){}
-})();
-</script>
+})();</script>
 </body>
 </html>
