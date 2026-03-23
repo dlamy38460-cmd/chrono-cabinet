@@ -589,16 +589,14 @@ async function resetPassword() {
 }
 
 
-function showAuthErr(msg) { var el=document.getElementById('authErr');el.textContent=msg;el.classList.add('show'); }
 
 function hideLoading() { document.getElementById('loadingScreen').style.display='none'; }
-function showAuth()    { document.getElementById('authScreen').style.display='flex'; document.getElementById('authScreen').classList.add('visible'); var ma=document.getElementById('mainA  var { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.href });
-  if (error) { document.getElementById('resetErr').textContent='Erreur — vérifiez le courriel.';document.getElementById('resetErr').classList.add('show'); }
-  else toast('Lien envoyé — vérifiez votre boîte courriel.','ok');
+function showAuth() {
+  document.getElementById('authScreen').style.display='flex';
+  var ma=document.getElementById('mainApp'); if(ma) ma.style.display='none !important';
 }
 
 
-function showAuthErr(msg) { var el=document.getElementById('authErr');el.textContent=msg;el.classList.add('show'); }
 
 
 
