@@ -675,7 +675,7 @@ async function saveEch(){
   var titre=document.getElementById('em-titre').value.trim(),dossier=document.getElementById('em-dossier').value.trim(),date=document.getElementById('em-date').value,heure=document.getElementById('em-heure').value||null,type=document.getElementById('em-type').value,notes=document.getElementById('em-notes').value.trim()||null;
   if(!titre){toast('Titre requis.','err');return;}if(!dossier){toast('Dossier requis.','err');return;}if(!date){toast('Date requise.','err');return;}
   var payload={titre,dossier,date,heure,type,notes,user_id:currentUser.id};
-  var {error};
+  var error;
   if(editingEchId){({error}=await sb.from('echeances').update(payload).eq('id',editingEchId));}
   else{({error}=await sb.from('echeances').insert(payload));}
   if(error){toast('Erreur sauvegarde.','err');return;}
