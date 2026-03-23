@@ -1080,62 +1080,55 @@ function renderFinancier(){
 }
 function setFinTab(t,btn){finTab=t;renderFinancier();}
 function renderNotifs(){
-  var myNotifs=NOTIFS;
+  var myNotifs=isAdmin?NOTIFS:NOTIFS.filter(n=>!n.meta||n.meta.includes((typeof allProfiles!=='undefined'?allProfiles:[]).find(a=>a.id===currentUser?.id)?.name));
   var filtered=notifFilter==='all'?myNotifs:notifFilter==='unread'?myNotifs.filter(n=>n.unread):myNotifs.filter(n=>n.type===notifFilter);
-  var unread=myNotifs.filter(n=>n.unread).length;
-
-  var typeColors={urgent:'var(--urgent-dim)',warn:'var(--warning-dim)',info:'var(--info-dim)',ok:'var(--sage-dim)'};
-  var typeBorders={urgent:'rgba(192,57,43,.3)',warn:'rgba(230,126,34,.25)',info:'rgba(41,128,185,.2)',ok:'rgba(74,122,68,.25)'};
-  var typeIconBg={urgent:'var(--urgent-dim)',warn:'var(--warning-dim)',info:'var(--info-dim)',ok:'var(--sage-dim)'};
-
-  var filterHTML=['all','unread','urgent','info','ok'].map(f=>{
-    var labels={all:'Toutes ('+myNotifs.length+')',unread:'Non lues ('+unread+')',urgent:'🔴 Urgentes',info:'💡 Info',ok:'✓ Système'};
-    return `<div onclick="setNF('${f}',this)" style="padding:.27rem .7rem;border:1px solid ${notifFilter===f?'var(--gold)':'var(--border2)'};border-radius:20px;font-size:.71rem;background:${notifFilter===f?'var(--gold-dim)':'var(--surface2)'};color:${notifFilter===f?'var(--gold)':'var(--text3)'};cursor:pointer;transition:all .2s">${labels[f]}</div>`;
-  }).join('');
-
-  var feedHTML=filtered.map(n=>`
-    <div style="background:var(--surface);border:1px solid ${n.unread?'var(--gold)':'var(--border)'};border-radius:var(--r);padding:.9rem 1.1rem;display:flex;align-items:flex-start;gap:.9rem;margin-bottom:.6rem;position:relative;${n.unread?'border-left:3px solid var(--gold)':''}">
-      <div style="width:34px;height:34px;border-radius:50%;background:${typeIconBg[n.type]||'var(--surface2)'};display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0">${n.icon}</div>
-      <div style="flex:1;min-width:0">
-        <div style="font-size:.84rem;font-weight:500;color:var(--text);margin-bottom:.2rem">${n.title}</div>
-        <div style="font-size:.79rem;color:var(--text2);line-height:1.45;margin-bottom:.25rem">${n.body}</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--text3);display:flex;flex-wrap:wrap;gap:.3rem .6rem;margin-bottom:.2rem">${n.meta.map(m=>`<span>${m}</span>`).join('')}</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:.63rem;color:var(--text3)">${n.time}</div>
-        ${n.action?`<div style="margin-top:.5rem"><button onclick="toast('Action : ${n.action}','ok')" style="padding:.28rem .7rem;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);color:var(--text2);font-family:'Outfit',sans-serif;font-size:.72rem;cursor:pointer">${n.action} →</button></div>`:''}
-      </div>
-      ${n.unread?`<div style="position:absolute;top:.8rem;right:.8rem;width:7px;height:7px;border-radius:50%;background:var(--gold)"></div>`:''}
-    </div>`).join('')||'<div style="text-align:center;padding:2rem;color:var(--text3);font-style:italic">Aucune notification.</div>';
+  var iconBg={urgent:'ni-urgent',warn:'ni-warn',info:'ni-info',ok:'ni-ok',gold:'ni-gold'};
+  var feed=filtered.map(n=>`<div class="notif-item ${n.unread?'unread':''}">
+    <div class="notif-icon ${iconBg[n.type]||'ni-info'}" style="font-size:1rem">${n.icon}</div>
+    <div class="notif-body">
+      <div class="notif-title">${n.title}</div>
+      <div style="font-size:.8rem;color:var(--text2);margin-top:.15rem;line-height:1.4">${n.body}</div>
+      <div class="notif-meta">${n.meta.map(m=>`<span>${m}</span>`).join('')}</div>
+      <div class="notif-time">${n.time}</div>
+      ${n.action?`<div class="notif-action"><button class="nbtn-sm" onclick="toast('Action : ${n.action}','ok')">${n.action} →</button></div>`:''}
+    </div>
+  </div>`).join('')||'<div class="empty">Aucune notification.</div>';
 
   // Settings panel
-  var settingsHTML=`<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
-    <div style="padding:1rem 1.2rem;border-bottom:1px solid var(--border);font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:500;color:var(--text)">⚙️ Paramètres des alertes</div>
-    ${[
-      {title:'Échéances judiciaires',items:['Rappel J-7','Rappel J-2','Rappel Jour J']},
-      {title:'Saisie de temps',items:['Aucune saisie depuis 3 jours','Entrée non facturée > 7 jours','Résumé hebdomadaire (lundi)']},
-      {title:'Canal de livraison',items:['Notification dans l\'app','Courriel']},
-    ].map(section=>`
-      <div style="padding:.8rem 1.2rem;border-bottom:1px solid var(--border)">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--text3);letter-spacing:.15em;text-transform:uppercase;margin-bottom:.6rem">${section.title}</div>
-        ${section.items.map(item=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:.38rem 0;border-bottom:1px solid var(--border)">
-          <div style="font-size:.8rem;color:var(--text2)">${item}</div>
-          <label style="position:relative;width:34px;height:19px;flex-shrink:0;cursor:pointer">
-            <input type="checkbox" checked onchange="toast('Paramètre mis à jour','ok')" style="opacity:0;width:0;height:0;position:absolute">
-            <div style="position:absolute;inset:0;background:var(--sage);border-radius:9px;border:1px solid var(--sage)"></div>
-            <div style="position:absolute;top:3px;left:17px;width:11px;height:11px;border-radius:50%;background:white;transition:left .2s"></div>
-          </label>
-        </div>`).join('')}
-      </div>`).join('')}
-    <button onclick="toast('✓ Paramètres sauvegardés','ok')" style="display:flex;align-items:center;justify-content:center;padding:.7rem;background:var(--gold);color:var(--bg);border:none;border-radius:var(--r);font-family:'Outfit',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;width:calc(100% - 2.4rem);margin:1rem 1.2rem">Sauvegarder</button>
+  var settingsHtml=`<div class="settings-panel">
+    <div class="sp-head">⚙️ Paramètres des alertes</div>
+    <div class="sp-section">
+      <div class="sp-section-title">Échéances judiciaires</div>
+      ${[{l:'Rappel 30 jours avant',s:'30j avant',on:true},{l:'Rappel 7 jours avant',s:'1 sem avant',on:true},{l:'Rappel 48h avant',s:'48h avant',on:true},{l:'Rappel le jour même',s:'Jour J',on:true}].map((t,i)=>`<div class="toggle-row"><div class="toggle-label">${t.l}<div class="toggle-sub">${t.s}</div></div><label class="toggle"><input type="checkbox" ${t.on?'checked':''} onchange="toast('Paramètre mis à jour','ok')"><div class="toggle-track"></div><div class="toggle-knob"></div></label></div>`).join('')}
+    </div>
+    <div class="sp-section">
+      <div class="sp-section-title">Saisie de temps</div>
+      ${[{l:'Rappel si aucune saisie depuis 3 jours',on:true},{l:'Alerte entrée non facturée > 7 jours',on:true},{l:'Résumé hebdomadaire (lundi 8h)',on:false}].map((t,i)=>`<div class="toggle-row"><div class="toggle-label">${t.l}</div><label class="toggle"><input type="checkbox" ${t.on?'checked':''} onchange="toast('Paramètre mis à jour','ok')"><div class="toggle-track"></div><div class="toggle-knob"></div></label></div>`).join('')}
+    </div>
+    <div class="sp-section">
+      <div class="sp-section-title">Canal de livraison</div>
+      ${[{l:'Notification dans l\'app',on:true},{l:'Courriel',on:true},{l:'SMS (Twilio)',on:false}].map((t,i)=>`<div class="toggle-row"><div class="toggle-label">${t.l}</div><label class="toggle"><input type="checkbox" ${t.on?'checked':''} onchange="toast('Canal mis à jour','ok')"><div class="toggle-track"></div><div class="toggle-knob"></div></label></div>`).join('')}
+      <div class="sp-input-row" style="margin-top:.7rem"><div style="font-family:'JetBrains Mono',monospace;font-size:.59rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:.35rem">Numéro SMS</div><input type="text" placeholder="+1 418 555-0000"><div class="sp-hint">Format international requis</div></div>
+      <div class="sp-input-row" style="margin-top:.6rem"><div style="font-family:'JetBrains Mono',monospace;font-size:.59rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:.35rem">Courriel de notification</div><input type="email" placeholder="vaillancourt@lamy-avocats.ca" value="vaillancourt@lamy-avocats.ca"></div>
+    </div>
+    <button class="btn-save-settings" onclick="toast('✓ Paramètres sauvegardés','ok')">Sauvegarder les paramètres</button>
   </div>`;
 
+  var unreadCount=myNotifs.filter(n=>n.unread).length;
   document.getElementById('page-notifications').innerHTML=`
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.6rem">
-      <div style="display:flex;gap:.4rem;flex-wrap:wrap">${filterHTML}</div>
-      <button onclick="toast('Toutes marquées comme lues','ok')" style="padding:.32rem .8rem;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);color:var(--text2);font-family:'Outfit',sans-serif;font-size:.75rem;cursor:pointer">Tout marquer lu</button>
+      <div class="notif-filters">
+        <div class="nf ${notifFilter==='all'?'active':''}" onclick="setNF('all',this)">Toutes (${myNotifs.length})</div>
+        <div class="nf ${notifFilter==='unread'?'active':''}" onclick="setNF('unread',this)">Non lues (${unreadCount})</div>
+        <div class="nf ${notifFilter==='urgent'?'active':''}" onclick="setNF('urgent',this)">🔴 Urgentes</div>
+        <div class="nf ${notifFilter==='info'?'active':''}" onclick="setNF('info',this)">💡 Info</div>
+        <div class="nf ${notifFilter==='ok'?'active':''}" onclick="setNF('ok',this)">✓ Système</div>
+      </div>
+      <button class="nbtn-sm" onclick="toast('Toutes marquées comme lues','ok')">Tout marquer lu</button>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 300px;gap:1.2rem;align-items:start">
-      <div>${feedHTML}</div>
-      ${settingsHTML}
+    <div class="notif-layout">
+      <div class="notif-feed">${feed}</div>
+      ${settingsHtml}
     </div>`;
 }
 function setNF(f,btn){notifFilter=f;renderNotifs();}
