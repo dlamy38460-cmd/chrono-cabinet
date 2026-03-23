@@ -54,6 +54,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 .role-label{font-size:.62rem;color:var(--text3);font-family:'JetBrains Mono',monospace;padding:.3rem .6rem;display:flex;align-items:center}
 
 .app{display:flex;min-height:100vh}
+#mainApp[style*="display:none"]{display:none!important}
 .sidebar{width:224px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50}
 .sidebar-logo{padding:1.4rem;border-bottom:1px solid var(--border)}
 .logo-name{font-family:'Cormorant Garamond',serif;font-size:1.75rem;font-weight:600;color:var(--gold);line-height:1}
@@ -357,7 +358,7 @@ textarea{resize:vertical;min-height:78px;font-family:'Outfit',sans-serif;font-si
   </div>
 </div>
 
-<div class="app">
+<div class="app" id="mainApp" style="display:none !important">
   <aside class="sidebar">
     <div class="sidebar-logo">
       <div style="display:inline-block;border:2px solid var(--gold);padding:.18rem .7rem;margin-bottom:.35rem">
@@ -366,8 +367,8 @@ textarea{resize:vertical;min-height:78px;font-family:'Outfit',sans-serif;font-si
       <div class="logo-tag">Avocats · Chrono v4</div>
     </div>
     <div class="user-pill">
-      <div class="user-avatar" id="uAvatar">V</div>
-      <div class="user-info"><div class="user-name" id="uName">Me Vaillancourt</div><div class="user-role admin" id="uRole">Administrateur</div></div>
+      <div class="user-avatar" id="uAvatar">?</div>
+      <div class="user-info"><div class="user-name" id="uName">—</div><div class="user-role" id="uRole">—</div></div>
     </div>
     <nav>
       <div class="nav-sec">Navigation</div>
@@ -534,8 +535,8 @@ async function signOut() {
 function showAuthErr(msg) { var el=document.getElementById('authErr');el.textContent=msg;el.classList.add('show'); }
 
 function hideLoading() { document.getElementById('loadingScreen').style.display='none'; }
-function showAuth()    { document.getElementById('authScreen').style.display='flex';document.getElementById('appScreen').style.display='none'; }
-function showApp()     { document.getElementById('authScreen').style.display='none';document.getElementById('appScreen').style.display='block'; }
+function showAuth()    { document.getElementById('authScreen').style.display='flex'; var ma=document.getElementById('mainApp'); if(ma) ma.style.display='none'; }
+function showApp()     { document.getElementById('authScreen').style.display='none'; document.getElementById('mainApp').style.display='flex';document.getElementById('appScreen').style.display='block'; }
 
 
 
@@ -574,8 +575,8 @@ async function signOut() {
 function showAuthErr(msg) { var el=document.getElementById('authErr');el.textContent=msg;el.classList.add('show'); }
 
 function hideLoading() { document.getElementById('loadingScreen').style.display='none'; }
-function showAuth()    { document.getElementById('authScreen').style.display='flex';document.getElementById('appScreen').style.display='none'; }
-function showApp()     { document.getElementById('authScreen').style.display='none';document.getElementById('appScreen').style.display='block'; }
+function showAuth()    { document.getElementById('authScreen').style.display='flex'; var ma=document.getElementById('mainApp'); if(ma) ma.style.display='none'; }
+function showApp()     { document.getElementById('authScreen').style.display='none'; document.getElementById('mainApp').style.display='flex';document.getElementById('appScreen').style.display='block'; }
 
 
 
