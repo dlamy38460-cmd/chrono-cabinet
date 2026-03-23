@@ -848,7 +848,65 @@ function openDelEntry(id){deletingId=id;deletingType='entry';document.getElement
 // ADMIN PAGE
 // ══════════════════════════════════════════════
 function renderAdminPage(){
-  document.getElementById('avocatListPg').innerHTML=allProfiles.map(p=>'<div class="avocat-row"><div class="av-avatar">'+p.full_name.charAt(0).toUpperCase()+'</div><div class="av-info"><div class="av-name">'+p.full_name+'</div><div class="av-taux">'+p.taux_defaut+' $/h · '+p.role+'</div></div><span class="av-role-badge">'+p.role+'</span></div>').join('')||'<div class="empty">Aucun avocat.</div>';
+  var listHTML = allProfiles.length ? allProfiles.map(function(p){
+    var initials = (p.full_name||p.email||'?').charAt(0).toUpperCase();
+    var name = p.full_name || p.email || 'Sans nom';
+    var roleColor = p.role==='admin' ? 'var(--gold)' : 'var(--sage)';
+    var roleBg    = p.role==='admin' ? 'var(--gold-dim)' : 'var(--sage-dim)';
+    var pid = p.id;
+    return '<div style="display:flex;align-items:center;gap:.9rem;padding:.85rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:.5rem">'
+      + '<div style="width:38px;height:38px;border-radius:50%;background:var(--gold-dim);border:1px solid rgba(201,168,76,.2);display:flex;align-items:center;justify-content:center;font-family:JetBrains Mono,monospace;font-size:.9rem;font-weight:600;color:var(--gold);flex-shrink:0">'+initials+'</div>'
+      + '<div style="flex:1;min-width:0">'
+        + '<div style="font-size:.86rem;font-weight:500;color:var(--text)">'+name+'</div>'
+        + '<div style="font-family:JetBrains Mono,monospace;font-size:.67rem;color:var(--text3);margin-top:2px">'+(p.email||'')+' · '+(p.taux_defaut||0)+' $/h</div>'
+      + '</div>'
+      + '<span style="font-family:JetBrains Mono,monospace;font-size:.6rem;padding:.12rem .45rem;border-radius:3px;background:'+roleBg+';color:'+roleColor+'">'+p.role+'</span>'
+      + '<button data-uid="'+p.id+'" onclick="openEditAvocat(this.getAttribute(\'data-uid\'))" style="padding:.3rem .7rem;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);color:var(--text2);font-size:.74rem;cursor:pointer">✏️ Modifier</button>'
+      + '</div>';
+  }).join('') : '<div style="text-align:center;padding:2rem;color:var(--text3);font-style:italic">Aucun avocat enregistré.</div>';
+
+  document.getElementById('avocatListPg').innerHTML = listHTML;
+}
+
+function openEditAvocat(userId){
+  var p = allProfiles.find(function(x){ return x.id===userId; });
+  if(!p) return;
+  var overlay = document.createElement('div');
+  overlay.id = 'editAvocatOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;display:flex;align-items:center;justify-content:center;padding:1rem';
+  overlay.innerHTML = '<div style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);padding:1.5rem;width:100%;max-width:420px;position:relative">'
+    + '<div style="font-family:Cormorant Garamond,serif;font-size:1.1rem;font-weight:500;color:var(--text);margin-bottom:1.1rem">Modifier le profil</div>'
+    + '<div style="display:flex;flex-direction:column;gap:.75rem">'
+      + '<div><div style="font-family:JetBrains Mono,monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Nom complet</div>'
+        + '<input id="ea-name" type="text" value="'+(p.full_name||'')+'" style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:JetBrains Mono,monospace;font-size:.82rem;color:var(--text);background:var(--surface2);outline:none;width:100%"></div>'
+      + '<div><div style="font-family:JetBrains Mono,monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Taux horaire ($/h)</div>'
+        + '<input id="ea-taux" type="number" value="'+(p.taux_defaut||200)+'" style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:JetBrains Mono,monospace;font-size:.82rem;color:var(--text);background:var(--surface2);outline:none;width:100%"></div>'
+      + '<div><div style="font-family:JetBrains Mono,monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Rôle</div>'
+        + '<select id="ea-role" style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:JetBrains Mono,monospace;font-size:.82rem;color:var(--text);background:var(--surface2);outline:none;width:100%">'
+          + '<option value="avocat" '+(p.role==='avocat'?'selected':'')+'>Avocat</option>'
+          + '<option value="admin" '+(p.role==='admin'?'selected':'')+'>Administrateur</option>'
+        + '</select></div>'
+    + '</div>'
+    + '<div style="display:flex;gap:.6rem;margin-top:1.2rem">'
+      + '<button onclick="saveEditAvocat(\'+userId+\')" style="flex:1;padding:.72rem;background:var(--gold);color:var(--bg);border:none;border-radius:var(--r);font-family:Outfit,sans-serif;font-size:.84rem;font-weight:600;cursor:pointer">Sauvegarder</button>'
+      + '<button onclick="document.getElementById(\'editAvocatOverlay\').remove()" style="padding:.72rem 1.1rem;background:var(--surface2);color:var(--text2);border:1px solid var(--border2);border-radius:var(--r);font-size:.82rem;cursor:pointer">Annuler</button>'
+    + '</div>'
+    + '</div>';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.remove(); });
+}
+
+async function saveEditAvocat(userId){
+  var name = document.getElementById('ea-name').value.trim();
+  var taux = parseFloat(document.getElementById('ea-taux').value)||200;
+  var role = document.getElementById('ea-role').value;
+  if(!name){ toast('Nom requis.','err'); return; }
+  var {error} = await sb.from('profiles').update({full_name:name, taux_defaut:taux, role:role}).eq('id',userId);
+  if(error){ toast('Erreur : '+error.message,'err'); return; }
+  toast('✓ Profil mis à jour.','ok');
+  document.getElementById('editAvocatOverlay').remove();
+  await loadData();
+  renderAdminPage();
 }
 
 async function inviteAvocat(){
@@ -1935,4 +1993,3 @@ function buildExistingClients(){
 </script>
 </body>
 </html>
-fprof
