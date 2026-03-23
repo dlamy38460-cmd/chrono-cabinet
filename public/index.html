@@ -294,6 +294,11 @@ body.light input,body.light textarea,body.light select{background:var(--surface)
 .theme-track.on .theme-knob{transform:translateX(14px);background:white}
 body{transition:background .3s,color .3s}
 @keyframes spin{to{transform:rotate(360deg)}}
+
+.view-toggle{margin:.5rem;padding:.5rem .9rem;background:var(--gold-dim);border:1px solid rgba(201,168,76,.2);border-radius:var(--r);display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:all .2s}
+.view-toggle:hover{border-color:var(--gold)}
+.view-toggle-label{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase}
+.view-toggle-val{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--gold);font-weight:600}
 </style>
 </head>
 <body>
@@ -345,6 +350,10 @@ body{transition:background .3s,color .3s}
         <div class="user-role" id="userRoleBadge">avocat</div>
       </div>
       <div class="logout-btn" onclick="signOut()" title="Déconnexion"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
+    </div>
+    <div class="view-toggle" id="viewToggleBtn" onclick="toggleViewMode()" style="display:none" title="Basculer entre vue Admin et vue Avocat">
+      <span class="view-toggle-label">Vue active</span>
+      <span class="view-toggle-val" id="viewToggleVal">⚡ Admin</span>
     </div>
     <nav>
       <div class="nav-sec">Navigation</div>
@@ -570,6 +579,9 @@ function renderUserPill() {
 
 function applyRoleUI() {
   document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdmin ? '' : 'none');
+  // Show view toggle only for admin users (they can switch to avocat view)
+  var btn = document.getElementById('viewToggleBtn');
+  if (btn) btn.style.display = isAdmin ? 'flex' : 'none';
 }
 
 // ══════════════════════════════════════════════
@@ -837,6 +849,38 @@ function closeOverlay(id){document.getElementById(id).classList.remove('show');}
 document.querySelectorAll('.overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('show');}));
 function toast(msg,type){var t=document.getElementById('toast');t.textContent=msg;t.className='toast '+(type||'ok')+' show';clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),4500);}
 
+// ── TOGGLE VUE ADMIN/AVOCAT (pour utilisateurs avec double rôle) ──────────
+var _viewMode = 'admin'; // 'admin' ou 'avocat'
+
+function toggleViewMode() {
+  _viewMode = _viewMode === 'admin' ? 'avocat' : 'admin';
+  var isAdminView = _viewMode === 'admin';
+  var btn = document.getElementById('viewToggleBtn');
+  var val = document.getElementById('viewToggleVal');
+  if (val) val.textContent = isAdminView ? '⚡ Admin' : '👤 Avocat';
+  // Update nav visibility
+  document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdminView ? '' : 'none');
+  // Refresh current page
+  var active = document.querySelector('.nav-item.active');
+  var page = active ? active.getAttribute('onclick').match(/'([^']+)'/)[1] : 'dashboard';
+  // Temporarily override isAdmin for rendering
+  var _savedIsAdmin = isAdmin;
+  if (!isAdminView) {
+    // Render as avocat
+    window._renderAsAdmin = false;
+  } else {
+    window._renderAsAdmin = true;
+  }
+  goTo(page, active);
+  toast(isAdminView ? '⚡ Vue administrateur' : '👤 Vue avocat', 'info');
+}
+
+function isAdminView() {
+  // Returns true if should render as admin
+  if (!isAdmin) return false; // not admin at all
+  return window._renderAsAdmin !== false;
+}
+
 
 // ── NOUVELLES FONCTIONNALITÉS ────────────────────────────────────────
 var _accueilStep = 1;
@@ -879,14 +923,14 @@ function toggleTheme(){
   try { localStorage.setItem('chrono-theme', isLight ? 'light' : 'dark'); } catch(e){}
 }
 function renderFinancier(){
-  var myDos=currentRole==='admin'?DOSSIERS_FIN:DOSSIERS_FIN.filter(d=>d.avocat===AVOCATS.find(a=>a.id===currentUserId)?.name);
+  var myDos=isAdmin?DOSSIERS_FIN:DOSSIERS_FIN.filter(d=>d.avocat===(typeof allProfiles!=='undefined'?allProfiles:[]).find(a=>a.id===currentUser?.id)?.name);
   var totH=myDos.reduce((s,d)=>s+d.heuresTotal,0);
   var totAmt=myDos.reduce((s,d)=>s+d.honorairesTotal,0);
   var totFact=myDos.reduce((s,d)=>s+d.facture,0);
   var nonFact=totAmt-totFact;
   var rentMoy=myDos.length?Math.round(myDos.reduce((s,d)=>{var r=d.honorairesBudget>0?d.honorairesTotal/d.honorairesBudget*100:0;return s+r;},0)/myDos.length):0;
 
-  var statsHtml=currentRole==='admin'?`
+  var statsHtml=isAdmin?`
     <div class="stat-card"><div class="stat-lbl">Revenus totaux (mars)</div><div class="stat-val" style="font-size:1.5rem">${totAmt.toLocaleString('fr-CA',{minimumFractionDigits:0})} $</div><div class="stat-trend up">▲ +8% vs mois dernier</div></div>
     <div class="stat-card"><div class="stat-lbl">Non facturé</div><div class="stat-val warn" style="font-size:1.5rem">${nonFact.toLocaleString('fr-CA',{minimumFractionDigits:0})} $</div><div class="stat-sub">${myDos.filter(d=>d.facture<d.honorairesTotal).length} dossiers en attente</div></div>
     <div class="stat-card"><div class="stat-lbl">Heures totales</div><div class="stat-val">${totH.toFixed(1)}<span style="font-size:1rem;color:var(--text3)">h</span></div><div class="stat-sub">${myDos.length} dossiers actifs</div></div>
@@ -897,7 +941,7 @@ function renderFinancier(){
 
   // Bar chart revenus par avocat (admin only)
   var avBarHtml='';
-  if(currentRole==='admin'){
+  if(isAdmin){
     var byAv={};DOSSIERS_FIN.forEach(d=>{if(!byAv[d.avocat])byAv[d.avocat]=0;byAv[d.avocat]+=d.honorairesTotal;});
     var avSorted=Object.entries(byAv).sort((a,b)=>b[1]-a[1]),avMax=avSorted[0]?.[1]||1;
     avBarHtml=`<div class="card card-accent"><div class="chart-title">Revenus par avocat — mars 2026</div><div class="bar-chart">${avSorted.map(([n,v])=>{var pct=Math.max(4,Math.round(v/avMax*100));return `<div class="bar-row"><div class="bar-lbl">${n.replace('Me ','')}</div><div class="bar-track"><div class="bar-fill sage" style="width:${pct}%">${pct>20?`<div class="bar-val">${v.toLocaleString('fr-CA',{minimumFractionDigits:0})} $</div>`:''}</div>${pct<=20?`<div class="bar-val out">${v.toLocaleString('fr-CA',{minimumFractionDigits:0})} $</div>`:''}</div></div>`;}).join('')}</div></div>`;
@@ -912,7 +956,7 @@ function renderFinancier(){
     return `<tr>
       <td class="mono">${d.dossier}</td>
       <td style="font-size:.8rem;color:var(--text2);max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${d.client}</td>
-      ${currentRole==='admin'?`<td style="font-size:.78rem;color:var(--text3)">${d.avocat.replace('Me ','')}</td>`:''}
+      ${isAdmin?`<td style="font-size:.78rem;color:var(--text3)">${d.avocat.replace('Me ','')}</td>`:''}
       <td class="right">${d.heuresTotal.toFixed(1)}h</td>
       <td class="right">${d.honorairesTotal.toLocaleString('fr-CA',{minimumFractionDigits:0})} $</td>
       <td class="right" style="color:${nonF>0?'#e09040':'#6ab864'}">${nonF>0?nonF.toLocaleString('fr-CA',{minimumFractionDigits:0})+' $':'✓'}</td>
@@ -929,11 +973,11 @@ function renderFinancier(){
 
   var mainContent='';
   if(finTab==='dossiers'){
-    mainContent=`<div class="card card-accent" style="overflow-x:auto"><div class="chart-title">Rentabilité par dossier</div><table class="rent-table"><thead><tr><th>Dossier</th><th>Client</th>${currentRole==='admin'?'<th>Avocat</th>':''}<th class="right">Heures</th><th class="right">Honoraires</th><th class="right">Non facturé</th><th>Rentabilité</th><th>Statut</th></tr></thead><tbody>${tableRows}</tbody></table></div>`;
+    mainContent=`<div class="card card-accent" style="overflow-x:auto"><div class="chart-title">Rentabilité par dossier</div><table class="rent-table"><thead><tr><th>Dossier</th><th>Client</th>${isAdmin?'<th>Avocat</th>':''}<th class="right">Heures</th><th class="right">Honoraires</th><th class="right">Non facturé</th><th>Rentabilité</th><th>Statut</th></tr></thead><tbody>${tableRows}</tbody></table></div>`;
   } else if(finTab==='avocat'){
-    var avRows=AVOCATS.map(av=>{
+    var avRows=(typeof allProfiles!=='undefined'?allProfiles:[]).map(av=>{
       var avD=DOSSIERS_FIN.filter(d=>d.avocat===av.name);
-      if(currentRole!=='admin'&&av.id!==currentUserId)return'';
+      if(!isAdmin&&av.id!==currentUser?.id)return'';
       var avH=avD.reduce((s,d)=>s+d.heuresTotal,0),avAmt=avD.reduce((s,d)=>s+d.honorairesTotal,0),avF=avD.reduce((s,d)=>s+d.facture,0);
       var txH=avH>0?avAmt/avH:0;
       var sparkData=[8500,7200,9100,8800,10200,9600,11000,9800,8400,10500,9200,avAmt];
@@ -951,15 +995,15 @@ function renderFinancier(){
   }
 
   document.getElementById('page-financier').innerHTML=`
-    <div class="stats-row ${currentRole==='admin'?'stats-4':'stats-3'}">${statsHtml}</div>
-    ${currentRole==='admin'?`<div class="dash-grid" style="margin-bottom:1rem">${avBarHtml}<div class="card card-accent"><div class="chart-title">Dossiers par statut de facturation</div><div style="display:flex;flex-direction:column;gap:.7rem;margin-top:.3rem">
+    <div class="stats-row ${isAdmin?'stats-4':'stats-3'}">${statsHtml}</div>
+    ${isAdmin?`<div class="dash-grid" style="margin-bottom:1rem">${avBarHtml}<div class="card card-accent"><div class="chart-title">Dossiers par statut de facturation</div><div style="display:flex;flex-direction:column;gap:.7rem;margin-top:.3rem">
       ${[{l:'Facturés',v:2,c:'#6ab864'},{l:'Partiellement facturés',v:1,c:'#e09040'},{l:'Non facturés',v:3,c:'#e06050'}].map(s=>`<div><div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:.25rem"><span style="color:var(--text2)">${s.l}</span><span style="font-family:'JetBrains Mono',monospace;color:${s.c}">${s.v}</span></div><div style="height:6px;background:var(--surface2);border-radius:3px"><div style="height:100%;width:${s.v/6*100}%;background:${s.c};border-radius:3px"></div></div></div>`).join('')}
     </div></div></div>`:''}
     ${tabsHtml}${mainContent}`;
 }
 function setFinTab(t,btn){finTab=t;renderFinancier();}
 function renderNotifs(){
-  var myNotifs=currentRole==='admin'?NOTIFS:NOTIFS.filter(n=>!n.meta||n.meta.includes(AVOCATS.find(a=>a.id===currentUserId)?.name));
+  var myNotifs=isAdmin?NOTIFS:NOTIFS.filter(n=>!n.meta||n.meta.includes((typeof allProfiles!=='undefined'?allProfiles:[]).find(a=>a.id===currentUser?.id)?.name));
   var filtered=notifFilter==='all'?myNotifs:notifFilter==='unread'?myNotifs.filter(n=>n.unread):myNotifs.filter(n=>n.type===notifFilter);
   var iconBg={urgent:'ni-urgent',warn:'ni-warn',info:'ni-info',ok:'ni-ok',gold:'ni-gold'};
   var feed=filtered.map(n=>`<div class="notif-item ${n.unread?'unread':''}">
@@ -1019,7 +1063,7 @@ function renderNotes(){
     '23001-002':{avocat:'Me Côté',contenu:'Contrat de services — Beaumont Distribution inc.\nAttente retour client sur clause 8.3 (exclusivité).'},
     '23004-001':{avocat:'Me Vaillancourt',contenu:'Nouveau dossier — Technologies Nordiques inc.\nAcquisition minoritaire dans startup IA.\n\nPoints à vérifier : due diligence, pacte d\'actionnaires, représentations et garanties.'},
   };
-  var myDos=currentRole==='admin'?Object.keys(NOTES_DATA):Object.keys(NOTES_DATA).filter(d=>NOTES_DATA[d].avocat===AVOCATS.find(a=>a.id===currentUserId)?.name);
+  var myDos=isAdmin?Object.keys(NOTES_DATA):Object.keys(NOTES_DATA).filter(d=>NOTES_DATA[d].avocat===(typeof allProfiles!=='undefined'?allProfiles:[]).find(a=>a.id===currentUser?.id)?.name);
   var activeDos=myDos[0]||'22006-001';
 
   document.getElementById('page-notes').innerHTML=`<div style="display:grid;grid-template-columns:240px 1fr;gap:1.1rem;align-items:start;min-height:500px">
@@ -1185,7 +1229,7 @@ function buildStep2(){
       <div>
         <div style="font-family:'JetBrains Mono',monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Avocat responsable *</div>
         <select id="avocatSel" onchange="_accueilData.avocatResp=this.value" style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--text);background:var(--surface2);outline:none;width:100%">
-          ${AVOCATS.map(a=>`<option ${_accueilData.avocatResp===a.name?'selected':''}>${a.name}</option>`).join('')}
+          ${(typeof allProfiles!=='undefined'?allProfiles:[]).map(a=>`<option ${_accueilData.avocatResp===a.name?'selected':''}>${a.name}</option>`).join('')}
         </select>
       </div>
       <div>
@@ -1469,7 +1513,7 @@ function renderConflits(){
         <div>
           <div style="font-family:'JetBrains Mono',monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Avocat responsable</div>
           <select style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--text);background:var(--surface);outline:none;width:100%">
-            ${AVOCATS.map(a=>`<option>${a.name}</option>`).join('')}
+            ${(typeof allProfiles!=='undefined'?allProfiles:[]).map(a=>`<option>${a.name}</option>`).join('')}
           </select>
         </div>
         <div>
