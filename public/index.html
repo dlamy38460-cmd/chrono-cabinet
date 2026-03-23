@@ -547,24 +547,44 @@ function hideLoading() {
 }
 
 // Timeout de sécurité — si Supabase ne répond pas en 3 secondes, afficher la connexion
-var _authResolved = false;
-setTimeout(function(){
-  if(!_authResolved){
-    hideLoading();
-    showAuth();
-  }
-}, 3000);
+// ── AUTH INITIALIZATION ──────────────────────────────────────────────────
+// Step 1: Show auth immediately, then check for existing session
+hideLoading();
+showAuth();
 
-sb.auth.onAuthStateChange(async (event, session) => {
-  _authResolved = true;
+// Step 2: Check for existing session
+sb.auth.getSession().then(function(result) {
+  var session = result.data && result.data.session;
   if (session && session.user) {
     currentUser = session.user;
-    await loadProfile();
-    hideLoading();
-    showApp();
-  } else {
+    loadProfile().then(function() {
+      showApp();
+    }).catch(function(err) {
+      console.error('loadProfile error:', err);
+      showApp(); // Show app anyway
+    });
+  }
+  // else: already showing auth screen, nothing to do
+}).catch(function(err) {
+  console.error('getSession error:', err);
+  // Already showing auth screen
+});
+
+// Step 3: Listen for auth state changes (login/logout)
+sb.auth.onAuthStateChange(function(event, session) {
+  if (event === 'SIGNED_IN' && session && session.user) {
+    currentUser = session.user;
+    loadProfile().then(function() {
+      showApp();
+    }).catch(function(err) {
+      console.error('loadProfile error:', err);
+      showApp();
+    });
+  } else if (event === 'SIGNED_OUT') {
     currentUser = null; currentProfile = null; isAdmin = false;
-    hideLoading();
+    showAuth();
+  } else if (event === 'PASSWORD_RECOVERY') {
+    // Handle password reset
     showAuth();
   }
 });
