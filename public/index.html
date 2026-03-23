@@ -579,7 +579,6 @@ function switchAuthTab(tab, btn) {
   document.getElementById('resetForm').style.display = tab==='reset' ? 'flex' : 'none';
 }
 
-async 
 async function resetPassword() {
   var email = document.getElementById('resetEmail').value.trim();
   if (!email) { document.getElementById('resetErr').textContent='Courriel requis.';document.getElementById('resetErr').classList.add('show');return; }
