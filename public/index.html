@@ -1,6 +1,4 @@
 <!DOCTYPE html>
-<!DOCTYPE html>
-<!-- v5 -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -269,7 +267,6 @@ textarea{resize:vertical;min-height:78px;font-family:'Outfit',sans-serif;font-si
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--surface)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
 @media(max-width:750px){.sidebar{transform:translateX(-100%)}.content{margin-left:0}.stats-grid,.stats-grid.admin-grid{grid-template-columns:1fr 1fr}.dash-grid,.agenda-layout{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.fg.full{grid-column:1}.entry-item{grid-template-columns:auto 1fr auto}.enums{display:none}.invite-row{grid-template-columns:1fr}.page,.topbar{padding:1rem}}
 
-/* THÈME CLAIR */
 body.light{
   --bg:#f5f0e8;--surface:#ffffff;--surface2:#f0ebe0;--surface3:#e8e0d0;
   --border:#ddd5c5;--border2:#ccc0a8;
@@ -511,14 +508,6 @@ var typeLabels = {judiciaire:'⚖️ Audience',depot:'📄 Dépôt',prescription
 // ══════════════════════════════════════════════
 // BOOT — Auth state listener
 // ══════════════════════════════════════════════
-try {
-  if(localStorage.getItem('chrono-theme')==='light'){
-    document.body.classList.add('light');
-    var tt=document.getElementById('themeTrack');if(tt)tt.classList.add('on');
-    var tl=document.getElementById('themeLabel');if(tl)tl.textContent='☀️ Clair';
-  }
-} catch(e){}
-
 sb.auth.onAuthStateChange(async (event, session) => {
   if (session && session.user) {
     currentUser = session.user;
@@ -624,14 +613,14 @@ function goTo(page, btn) {
   if(btn)btn.classList.add('active');
   document.getElementById('pageTitle').textContent=pageTitles[page];
   if(page==='dashboard'){loadData().then(renderDashboard);}
+  if(page==='agenda'){loadData().then(()=>{renderCalendar();renderEchList();});}
+  if(page==='historique'){loadData().then(renderHistory);}
+  if(page==='admin' && isAdmin){loadData().then(renderAdminPage);}
   if(page==='financier'){renderFinancier();}
   if(page==='notifications'){renderNotifs();}
   if(page==='notes'){loadData().then(renderNotes);}
   if(page==='accueil'){buildExistingClients();renderAccueil();}
   if(page==='conflits'){renderConflits();}
-  if(page==='agenda'){loadData().then(()=>{renderCalendar();renderEchList();});}
-  if(page==='historique'){loadData().then(renderHistory);}
-  if(page==='admin' && isAdmin){loadData().then(renderAdminPage);}
 }
 
 // ══════════════════════════════════════════════
@@ -825,12 +814,46 @@ document.querySelectorAll('.overlay').forEach(m=>m.addEventListener('click',e=>{
 function toast(msg,type){var t=document.getElementById('toast');t.textContent=msg;t.className='toast '+(type||'ok')+' show';clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),4500);}
 
 
-// ── NOUVELLES FONCTIONNALITÉS ─────────────────────────────────
+// ── NOUVELLES FONCTIONNALITÉS ────────────────────────────────────────
 var _accueilStep = 1;
+var _accueilData = {
+  clientType: 'morale', clientNom: '', clientEmail: '', clientTel: '',
+  clientNEQ: '', clientRep: '', clientLang: 'fr', clientExisting: null,
+  avocatResp: 'Me Vaillancourt', dossierNum: '24002-001', dossierDate: '2026-03-21',
+  domaine: 'Droit civil', urgence: 'Prioritaire', budget: '8 000 $',
+  facturation: 'Taux horaire', description: '', objectifs: [],
+  parties: [{name:'Groupe Beauchamp inc.',role:'adverse'},{name:'Fiducie Morin-Beauchamp',role:'tiers'}],
+  docs: [], conflitDecision: 'waived'
+};
 var _conflitTab='verification';
 var _conflitSearchDone=false;
 var _conflitDossierNum='24002-001';
+var DOSSIERS_FIN=[
+  {dossier:'22006-001',client:'Industries Saguenay inc.',avocat:'Me Vaillancourt',budgetH:20,heuresTotal:3,honorairesTotal:900,honorairesBudget:6000,facture:450,statut:'actif',moisData:[0,0,150,300,0,0,150,0,300,0,0,0]},
+  {dossier:'22008-003',client:'Beaupré c. Succession Morin',avocat:'Me Tremblay',budgetH:30,heuresTotal:2.5,honorairesTotal:625,honorairesBudget:7500,facture:500,statut:'actif',moisData:[0,100,0,200,125,0,200,0,0,0,0,0]},
+  {dossier:'21003-007',client:'Droit de la famille — Ouellet',avocat:'Me Bergeron',budgetH:25,heuresTotal:3.5,honorairesTotal:787.50,honorairesBudget:5625,facture:0,statut:'actif',moisData:[100,200,0,150,0,337.5,0,0,0,0,0,0]},
+  {dossier:'23001-002',client:'Beaumont Distribution inc.',avocat:'Me Côté',budgetH:10,heuresTotal:1,honorairesTotal:200,honorairesBudget:2000,facture:200,statut:'actif',moisData:[0,0,0,0,200,0,0,0,0,0,0,0]},
+  {dossier:'23004-001',client:'Technologies Nordiques inc.',avocat:'Me Vaillancourt',budgetH:15,heuresTotal:0.75,honorairesTotal:225,honorairesBudget:4500,facture:0,statut:'actif',moisData:[0,0,0,0,0,225,0,0,0,0,0,0]},
+  {dossier:'24001-001',client:'Nouveau client — Dupont',avocat:'Me Tremblay',budgetH:5,heuresTotal:0.5,honorairesTotal:125,honorairesBudget:1250,facture:0,statut:'actif',moisData:[0,0,0,0,0,125,0,0,0,0,0,0]},
+];
+var NOTIFS=[
+  {id:1,type:'urgent',icon:'⚠️',title:'Délai de prescription dans 1 jour',body:'Dossier 22008-003 — recours Beaupré',meta:['Me Tremblay','22008-003'],time:'Il y a 5 min',unread:true,action:'Voir dossier'},
+  {id:2,type:'urgent',icon:'⚖️',title:'Audience demain — 09h30',body:'Dossier 22006-001 — Cour supérieure, salle 2.08',meta:['Me Vaillancourt','22006-001'],time:'Il y a 1h',unread:true,action:'Voir détails'},
+  {id:3,type:'warn',icon:'⏰',title:'Dépôt de la défense dans 4 jours',body:'Dossier 21003-007 — délai 25 mars 17h00',meta:['Me Bergeron','21003-007'],time:'Il y a 3h',unread:true,action:'Voir agenda'},
+  {id:4,type:'info',icon:'💰',title:'Entrée non facturée depuis 5 jours',body:'3 entrées de temps pour le dossier 21003-007 — 787,50 $',meta:['Me Bergeron','21003-007'],time:'Aujourd\'hui 08:00',unread:true,action:'Facturer'},
+  {id:5,type:'warn',icon:'📋',title:'Aucune saisie depuis 4 jours',body:'Me Côté n\'a saisi aucun temps depuis le 17 mars',meta:['Me Côté'],time:'Hier 08:00',unread:false,action:'Rappeler'},
+  {id:6,type:'ok',icon:'✓',title:'Synchronisation Juris Évolution réussie',body:'12 entrées synchronisées avec succès',meta:['Toutes entrées'],time:'Hier 07:45',unread:false},
+  {id:7,type:'info',icon:'👤',title:'Me Tremblay s\'est connecté',body:'Première connexion de la journée',meta:['Me Tremblay'],time:'Hier 08:30',unread:false},
+];
 
+function toggleTheme(){
+  var isLight = document.body.classList.toggle('light');
+  var track = document.getElementById('themeTrack');
+  var label = document.getElementById('themeLabel');
+  if(track) track.classList.toggle('on', isLight);
+  if(label) label.textContent = isLight ? '☀️ Clair' : '🌙 Sombre';
+  try { localStorage.setItem('chrono-theme', isLight ? 'light' : 'dark'); } catch(e){}
+}
 function renderFinancier(){
   var myDos=currentRole==='admin'?DOSSIERS_FIN:DOSSIERS_FIN.filter(d=>d.avocat===AVOCATS.find(a=>a.id===currentUserId)?.name);
   var totH=myDos.reduce((s,d)=>s+d.heuresTotal,0);
@@ -998,7 +1021,34 @@ function renderNotes(){
   window._activeDos=activeDos;
   window._notesData=NOTES_DATA;
 }
+window.switchNote=function(dos){
+  if(window._notesData){
+    var ta=document.getElementById('noteArea');
+    if(ta&&window._activeDos)window._notesData[window._activeDos].contenu=ta.value;
+    window._activeDos=dos;
+    document.querySelectorAll('[id^="dnote-"]').forEach(el=>{
+      var d=el.id.replace('dnote-','');
+      el.style.background=d===dos?'var(--gold-glow)':'';
+      el.style.borderLeft=d===dos?'2px solid var(--gold)':'';
+      el.querySelector('div').style.color=d===dos?'var(--gold)':'var(--text2)';
+    });
+    var tag=document.getElementById('noteTag');
+    if(tag)tag.textContent=dos;
+    var ta2=document.getElementById('noteArea');
+    if(ta2)ta2.value=window._notesData[dos]?.contenu||'';
+  }
+}
+window.saveNote=function(){
+  var ta=document.getElementById('noteArea');
+  if(ta&&window._activeDos&&window._notesData)window._notesData[window._activeDos].contenu=ta.value;
+  var lbl=document.getElementById('noteSavedLbl');
+  if(lbl){lbl.style.opacity='1';setTimeout(()=>lbl.style.opacity='0',2000);}
+  toast('✓ Note sauvegardée — '+window._activeDos,'ok');
+}
 function renderAccueil(){
+  buildExistingClients();
+  if(!_accueilData.dossierNum) _accueilData.dossierNum=genDossierNum();
+  if(!_accueilData.avocatResp && typeof currentProfile!=="undefined" && currentProfile) _accueilData.avocatResp=currentProfile.full_name||"";
   _accueilStep = _accueilStep || 1;
   document.getElementById('page-accueil').innerHTML = buildAccueilHTML();
   bindAccueilEvents();
@@ -1178,7 +1228,66 @@ function buildStep3(){
     waived: {bg:'var(--amber-dim)',bc:'rgba(200,120,32,.3)',tc:'var(--warning)',ti:'⚠ Renonciations requises avant l\'ouverture',td:'Les parties concernées devront signer une renonciation écrite. Les formulaires seront générés automatiquement à la confirmation.'},
     refused: {bg:'var(--urgent-dim)',bc:'rgba(192,57,43,.3)',tc:'#e06050',ti:'⛔ Le mandat sera refusé et archivé',td:'Le dossier sera marqué comme refusé pour conflit. Un rapport sera généré et conservé au registre.'},
     submit: {bg:'var(--info-dim)',bc:'rgba(41,128,185,.2)',tc:'#5090d0',ti:'📋 Soumis pour révision — dossier en attente',td:'Me Vaillancourt sera notifié pour prendre une décision finale.'},
-  }
+  };
+  var w = warnContent[_accueilData.conflitDecision] || warnContent.waived;
+
+  return `<div class="card card-accent" style="margin-bottom:1rem">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:500;color:var(--text);margin-bottom:.25rem">Vérification automatique des conflits</div>
+    <div style="font-size:.75rem;color:var(--text3);font-style:italic;margin-bottom:1rem">Résultats basés sur les parties saisies à l'étape précédente</div>
+
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:.9rem 1.1rem;margin-bottom:1rem">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.55rem">Parties vérifiées</div>
+      <div style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.3rem">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:.7rem;padding:.2rem .55rem;border-radius:3px;background:var(--info-dim);color:#5090d0">
+          ${_accueilData.clientExisting!==null?_existingClients[_accueilData.clientExisting].name:(_accueilData.clientNom||'Nouveau client')} — Client
+        </span>
+        ${partiesHTML}
+      </div>
+    </div>
+
+    <div id="conflitSearchAnim" style="display:none;text-align:center;padding:1.5rem;color:var(--text3);font-style:italic;font-size:.82rem">
+      <div style="font-size:1.5rem;margin-bottom:.5rem;animation:spin .8s linear infinite;display:inline-block">⟳</div><br>
+      <span id="conflitSearchMsg">Recherche dans 159 dossiers…</span>
+    </div>
+
+    <div id="conflitResults">
+      <div style="background:var(--urgent-dim);border:1px solid rgba(192,57,43,.3);border-radius:var(--r);padding:1rem 1.2rem;display:flex;align-items:flex-start;gap:.9rem;margin-bottom:1rem">
+        <div style="font-size:1.2rem">⚠️</div>
+        <div style="flex:1">
+          <div style="font-size:.86rem;font-weight:600;color:#e06050;margin-bottom:.3rem">2 conflits détectés — action requise</div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:.7rem .9rem;margin-bottom:.5rem;border-left:3px solid var(--urgent)">
+            <div style="font-size:.82rem;font-weight:500;color:var(--text);margin-bottom:.2rem">Groupe Beauchamp inc. — Conflit élevé</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--text3)">Dossier 22006-001 · Me Vaillancourt · Actif · Art. 62 Code déontologie</div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:.7rem .9rem;border-left:3px solid var(--warning)">
+            <div style="font-size:.82rem;font-weight:500;color:var(--text);margin-bottom:.2rem">Fiducie Morin-Beauchamp — Conflit modéré</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--text3)">Dossier 23001-002 · Me Côté · Actif · Art. 62 al. 2</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:1rem">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.55rem">Décision *</div>
+        <div style="display:flex;flex-direction:column;gap:.4rem">
+          ${decisions.map(d=>`<div onclick="setConflitDecision('${d.v}')" style="display:flex;align-items:center;gap:.7rem;padding:.65rem .9rem;border:1px solid ${_accueilData.conflitDecision===d.v?d.c:'var(--border2)'};border-radius:var(--r);cursor:pointer;transition:all .2s;background:${_accueilData.conflitDecision===d.v?'rgba(0,0,0,.04)':'var(--surface2)'}">
+            <div style="width:16px;height:16px;border-radius:50%;border:2px solid ${_accueilData.conflitDecision===d.v?d.c:'var(--border2)'};background:${_accueilData.conflitDecision===d.v?d.c:'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0">${_accueilData.conflitDecision===d.v?'<div style="width:6px;height:6px;border-radius:50%;background:white"></div>':''}</div>
+            <div style="font-size:.82rem;color:${_accueilData.conflitDecision===d.v?'var(--text)':'var(--text2)'};">${d.l}</div>
+          </div>`).join('')}
+        </div>
+      </div>
+
+      <div style="padding:.9rem 1.1rem;background:${w.bg};border:1px solid ${w.bc};border-radius:var(--r)">
+        <div style="font-size:.82rem;font-weight:500;color:${w.tc};margin-bottom:.25rem">${w.ti}</div>
+        <div style="font-size:.78rem;color:var(--text2);line-height:1.5">${w.td}</div>
+      </div>
+
+      <div style="margin-top:.9rem">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.4rem">Notes sur la gestion du conflit</div>
+        <textarea placeholder="Documenter les discussions et justifications…" style="border:1px solid var(--border2);border-radius:var(--r);padding:.65rem .85rem;font-family:'Outfit',sans-serif;font-size:.82rem;color:var(--text);background:var(--surface2);outline:none;width:100%;resize:vertical;min-height:65px;line-height:1.6"></textarea>
+      </div>
+    </div>
+  </div>`;
+}
 function buildStep4(){
   var clientName = _accueilData.clientExisting!==null
     ? _existingClients[_accueilData.clientExisting].name
@@ -1532,33 +1641,34 @@ function lancerVerification(){
     toast('⚠ 2 conflits détectés — action requise','err');
   },3200);
 }
-function toggleTheme(){
-  var isLight = document.body.classList.toggle('light');
-  var track = document.getElementById('themeTrack');
-  var label = document.getElementById('themeLabel');
-  if(track) track.classList.toggle('on', isLight);
-  if(label) label.textContent = isLight ? '☀️ Clair' : '🌙 Sombre';
-  try { localStorage.setItem('chrono-theme', isLight ? 'light' : 'dark'); } catch(e){}
+function genDossierNum(){
+  var y=new Date().getFullYear().toString().slice(-2);
+  var n=String(Math.floor(Math.random()*900)+100);
+  return y+'0'+n+'-001';
 }
-var DOSSIERS_FIN=[
-  {dossier:'22006-001',client:'Industries Saguenay inc.',avocat:'Me Vaillancourt',budgetH:20,heuresTotal:3,honorairesTotal:900,honorairesBudget:6000,facture:450,statut:'actif',moisData:[0,0,150,300,0,0,150,0,300,0,0,0]},
-  {dossier:'22008-003',client:'Beaupré c. Succession Morin',avocat:'Me Tremblay',budgetH:30,heuresTotal:2.5,honorairesTotal:625,honorairesBudget:7500,facture:500,statut:'actif',moisData:[0,100,0,200,125,0,200,0,0,0,0,0]},
-  {dossier:'21003-007',client:'Droit de la famille — Ouellet',avocat:'Me Bergeron',budgetH:25,heuresTotal:3.5,honorairesTotal:787.50,honorairesBudget:5625,facture:0,statut:'actif',moisData:[100,200,0,150,0,337.5,0,0,0,0,0,0]},
-  {dossier:'23001-002',client:'Beaumont Distribution inc.',avocat:'Me Côté',budgetH:10,heuresTotal:1,honorairesTotal:200,honorairesBudget:2000,facture:200,statut:'actif',moisData:[0,0,0,0,200,0,0,0,0,0,0,0]},
-  {dossier:'23004-001',client:'Technologies Nordiques inc.',avocat:'Me Vaillancourt',budgetH:15,heuresTotal:0.75,honorairesTotal:225,honorairesBudget:4500,facture:0,statut:'actif',moisData:[0,0,0,0,0,225,0,0,0,0,0,0]},
-  {dossier:'24001-001',client:'Nouveau client — Dupont',avocat:'Me Tremblay',budgetH:5,heuresTotal:0.5,honorairesTotal:125,honorairesBudget:1250,facture:0,statut:'actif',moisData:[0,0,0,0,0,125,0,0,0,0,0,0]},
-];
-var NOTIFS=[
-  {id:1,type:'urgent',icon:'⚠️',title:'Délai de prescription dans 1 jour',body:'Dossier 22008-003 — recours Beaupré',meta:['Me Tremblay','22008-003'],time:'Il y a 5 min',unread:true,action:'Voir dossier'},
-  {id:2,type:'urgent',icon:'⚖️',title:'Audience demain — 09h30',body:'Dossier 22006-001 — Cour supérieure, salle 2.08',meta:['Me Vaillancourt','22006-001'],time:'Il y a 1h',unread:true,action:'Voir détails'},
-  {id:3,type:'warn',icon:'⏰',title:'Dépôt de la défense dans 4 jours',body:'Dossier 21003-007 — délai 25 mars 17h00',meta:['Me Bergeron','21003-007'],time:'Il y a 3h',unread:true,action:'Voir agenda'},
-  {id:4,type:'info',icon:'💰',title:'Entrée non facturée depuis 5 jours',body:'3 entrées de temps pour le dossier 21003-007 — 787,50 $',meta:['Me Bergeron','21003-007'],time:'Aujourd\'hui 08:00',unread:true,action:'Facturer'},
-  {id:5,type:'warn',icon:'📋',title:'Aucune saisie depuis 4 jours',body:'Me Côté n\'a saisi aucun temps depuis le 17 mars',meta:['Me Côté'],time:'Hier 08:00',unread:false,action:'Rappeler'},
-  {id:6,type:'ok',icon:'✓',title:'Synchronisation Juris Évolution réussie',body:'12 entrées synchronisées avec succès',meta:['Toutes entrées'],time:'Hier 07:45',unread:false},
-  {id:7,type:'info',icon:'👤',title:'Me Tremblay s\'est connecté',body:'Première connexion de la journée',meta:['Me Tremblay'],time:'Hier 08:30',unread:false},
-];
 
+function buildExistingClients(){
+  var seen={};
+  (typeof entries!=='undefined'?entries:[]).forEach(function(e){
+    if(!seen[e.dossier]){
+      var prof=typeof allProfiles!=='undefined'?allProfiles.find(function(p){return p.id===e.user_id;}):null;
+      seen[e.dossier]={name:e.dossier,dossier:e.dossier,avocat:prof?prof.full_name:'',since:e.date,count:1};
+    } else { seen[e.dossier].count++; }
+  });
+  _existingClients=Object.values(seen).slice(0,8);
 }
+
+
+// ── THEME RESTORE ──────────────────────────────────────────────────────
+(function(){
+  try {
+    if(localStorage.getItem('chrono-theme')==='light'){
+      document.body.classList.add('light');
+      var tt=document.getElementById('themeTrack');if(tt)tt.classList.add('on');
+      var tl=document.getElementById('themeLabel');if(tl)tl.textContent='☀️ Clair';
+    }
+  } catch(e){}
+})();
 </script>
 </body>
 </html>
