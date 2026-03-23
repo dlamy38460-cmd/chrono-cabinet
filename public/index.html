@@ -458,6 +458,11 @@ body{transition:background .3s,color .3s}
         <div class="hint" style="margin-top:.6rem">Un courriel d'invitation sera envoyé. L'avocat devra créer son mot de passe via le lien reçu.</div>
       </div>
     </div>
+  <div class="page" id="page-financier"></div>
+  <div class="page" id="page-notifications"></div>
+  <div class="page" id="page-notes"></div>
+  <div class="page" id="page-accueil"></div>
+  <div class="page" id="page-conflits"></div>
   </div>
 </div>
 </div>
@@ -514,7 +519,7 @@ var isAdmin = false;
 var calDate = new Date(), selectedDay = null, echFilter = 'all';
 var editingEchId = null, editingEntryId = null, deletingId = null, deletingType = null;
 var isRecording = false, recognition = null;
-var pageTitles = {dashboard:'Tableau de bord',agenda:'Agenda & Échéances',saisie:'Saisie de temps',historique:'Historique',admin:'Gestion des avocats'};
+var pageTitles = {dashboard:'Tableau de bord',agenda:'Agenda & Échéances',saisie:'Saisie de temps',historique:'Historique',admin:'Gestion des avocats',financier:'Tableau financier',notifications:'Notifications & Alertes',notes:'Notes de dossier',accueil:'Accueil client',conflits:'Conflits d\'intérêts'};
 var typeLabels = {judiciaire:'⚖️ Audience',depot:'📄 Dépôt',prescription:'⏰ Prescription',reponse:'✉️ Réponse',reunion:'👥 Réunion',autre:'📌 Autre'};
 
 // ══════════════════════════════════════════════
@@ -645,9 +650,9 @@ function showApp()     { document.getElementById('authScreen').style.display='no
 function goTo(page, btn) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
-  document.getElementById('page-'+page).classList.add('active');
+  var pageEl=document.getElementById('page-'+page); if(pageEl) pageEl.classList.add('active'); else { console.warn('Page not found: page-'+page); return; }
   if(btn)btn.classList.add('active');
-  document.getElementById('pageTitle').textContent=pageTitles[page];
+  var pt=document.getElementById('pageTitle'); if(pt) pt.textContent=pageTitles[page]||page;
   if(page==='dashboard'){loadData().then(renderDashboard);}
   if(page==='agenda'){loadData().then(()=>{renderCalendar();renderEchList();});}
   if(page==='historique'){loadData().then(renderHistory);}
