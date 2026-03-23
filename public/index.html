@@ -445,19 +445,7 @@ body{transition:background .3s,color .3s}
     </div>
 
     <!-- ADMIN -->
-    <div class="page admin-only" id="page-admin">
-      <div class="avocat-list-pg" id="avocatListPg"></div>
-      <div class="invite-form card card-accent">
-        <h3>Inviter un avocat</h3>
-        <div class="invite-row">
-          <div class="fg"><div class="flbl">Nom complet</div><input type="text" id="inv-name" placeholder="Me Tremblay"></div>
-          <div class="fg"><div class="flbl">Courriel</div><input type="email" id="inv-email" placeholder="tremblay@lamy-avocats.ca"></div>
-          <div class="fg"><div class="flbl">Taux ($/h)</div><input type="number" id="inv-taux" placeholder="250" min="0"></div>
-          <button class="btn-invite" onclick="inviteAvocat()">Inviter</button>
-        </div>
-        <div class="hint" style="margin-top:.6rem">Un courriel d'invitation sera envoyé. L'avocat devra créer son mot de passe via le lien reçu.</div>
-      </div>
-    </div>
+    <div class="page admin-only" id="page-admin"></div>
   <div class="page" id="page-financier"></div>
   <div class="page" id="page-notifications"></div>
   <div class="page" id="page-notes"></div>
@@ -885,7 +873,24 @@ function renderAdminPage(){
       + '</div>';
   }).join('') : '<div style="text-align:center;padding:2rem;color:var(--text3);font-style:italic">Aucun avocat enregistré.</div>';
 
-  document.getElementById('avocatListPg').innerHTML = listHTML;
+  // Inject everything into page-admin
+  var adminPage = document.getElementById('page-admin');
+  if (!adminPage) return;
+  adminPage.innerHTML = '<div id="avocatListPg">'+listHTML+'</div>'
+    + '<div class="invite-form card card-accent" style="margin-top:1.2rem">'
+      + '<h3 style="font-family:Cormorant Garamond,serif;font-size:1.1rem;font-weight:500;color:var(--text);margin-bottom:1rem">Inviter un avocat</h3>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr 120px auto;gap:.7rem;align-items:end">'
+        + '<div><div style="font-family:JetBrains Mono,monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Nom complet</div>'
+          + '<input type="text" id="inv-name" placeholder="Me Tremblay" style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:JetBrains Mono,monospace;font-size:.82rem;color:var(--text);background:var(--surface2);outline:none;width:100%"></div>'
+        + '<div><div style="font-family:JetBrains Mono,monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Courriel</div>'
+          + '<input type="email" id="inv-email" placeholder="avocat@lamy-avocats.ca" style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:JetBrains Mono,monospace;font-size:.82rem;color:var(--text);background:var(--surface2);outline:none;width:100%"></div>'
+        + '<div><div style="font-family:JetBrains Mono,monospace;font-size:.59rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Taux ($/h)</div>'
+          + '<input type="number" id="inv-taux" placeholder="250" min="0" style="border:1px solid var(--border2);border-radius:var(--r);padding:.6rem .8rem;font-family:JetBrains Mono,monospace;font-size:.82rem;color:var(--text);background:var(--surface2);outline:none;width:100%"></div>'
+        + '<button id="inviteBtn" onclick="inviteAvocat()" style="padding:.65rem 1.2rem;background:var(--gold);color:var(--bg);border:none;border-radius:var(--r);font-family:Outfit,sans-serif;font-size:.84rem;font-weight:600;cursor:pointer">Inviter</button>'
+      + '</div>'
+      + '<div style="margin-top:.5rem;font-size:.75rem;color:var(--text3);font-style:italic">Un courriel d\'invitation sera envoyé. L\'avocat devra créer son mot de passe via le lien reçu.</div>'
+      + '<div id="inviteMsg"></div>'
+    + '</div>';
 }
 
 function openEditAvocat(userId){
