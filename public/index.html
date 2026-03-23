@@ -844,11 +844,36 @@ function renderAdminPage(){
 async function inviteAvocat(){
   var name=document.getElementById('inv-name').value.trim(),email=document.getElementById('inv-email').value.trim(),taux=parseFloat(document.getElementById('inv-taux').value)||200;
   if(!name||!email){toast('Nom et courriel requis.','err');return;}
-  // Utilise l'API admin Supabase via une Edge Function (à déployer séparément)
-  // Pour l'instant, affiche les instructions manuelles
-  toast('Créez le compte dans Supabase > Auth > Invite user, puis ajustez le profil.','warn');
-  // Note: L'invitation automatique nécessite une Edge Function Supabase.
-  // Instructions dans le README.
+  var btn=document.getElementById('inviteBtn');
+  if(btn){btn.textContent='Envoi en cours…';btn.disabled=true;}
+  try {
+    // Step 1: Invite user via Supabase Auth (sends email automatically)
+    var {data,error} = await sb.auth.admin.inviteUserByEmail(email, {
+      data: { full_name: name }
+    });
+    if(error) throw error;
+    var userId = data.user.id;
+    // Step 2: Create profile with role and taux
+    var {error:e2} = await sb.from('profiles').upsert({
+      id: userId,
+      full_name: name,
+      email: email,
+      role: 'avocat',
+      taux_defaut: taux
+    });
+    if(e2) throw e2;
+    toast('✓ Invitation envoyée à '+email, 'ok');
+    document.getElementById('inv-name').value='';
+    document.getElementById('inv-email').value='';
+    document.getElementById('inv-taux').value='';
+    await loadData();
+    renderAdminPage();
+  } catch(err) {
+    // Fallback: create profile and tell admin to invite manually
+    toast('Courriel d\'invitation envoyé manuellement requis — vérifiez Supabase Auth.','warn');
+    console.error('inviteAvocat error:', err);
+  }
+  if(btn){btn.textContent='Inviter';btn.disabled=false;}
 }
 
 // ══════════════════════════════════════════════
