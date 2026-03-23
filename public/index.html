@@ -962,7 +962,45 @@ function toggleTheme(){
   try { localStorage.setItem('chrono-theme', isLight ? 'light' : 'dark'); } catch(e){}
 }
 function renderFinancier(){
-  var myDos=isAdmin?DOSSIERS_FIN:DOSSIERS_FIN.filter(d=>d.avocat===(typeof allProfiles!=='undefined'?allProfiles:[]).find(a=>a.id===currentUser?.id)?.name);
+  // Build financial data from real Supabase entries
+  var allEntries = typeof entries!=='undefined' ? entries : [];
+  var allProfs = typeof allProfiles!=='undefined' ? allProfiles : [];
+  
+  // Group entries by dossier
+  var dossierMap = {};
+  allEntries.forEach(function(e) {
+    if(!dossierMap[e.dossier]) {
+      var prof = allProfs.find(function(p){ return p.id===e.user_id; });
+      dossierMap[e.dossier] = {
+        dossier: e.dossier,
+        client: e.dossier, // Use dossier as client name until we have client table
+        avocat: prof ? (prof.full_name||prof.email) : 'Inconnu',
+        avocat_id: e.user_id,
+        heuresTotal: 0,
+        honorairesTotal: 0,
+        honorairesBudget: 10000, // Default budget
+        facture: 0,
+        statut: 'actif',
+        moisData: Array(12).fill(0),
+      };
+    }
+    dossierMap[e.dossier].heuresTotal += e.minutes/60;
+    dossierMap[e.dossier].honorairesTotal += parseFloat(e.montant||0);
+    // Map to month index (0-11)
+    if(e.date) {
+      var mo = new Date(e.date+'T12:00:00').getMonth();
+      dossierMap[e.dossier].moisData[mo] += parseFloat(e.montant||0);
+    }
+  });
+  
+  var realDos = Object.values(dossierMap);
+  var myDos = isAdminView() ? realDos : realDos.filter(function(d){ return d.avocat_id===currentUser.id; });
+  if(!myDos.length) {
+    document.getElementById('page-financier').innerHTML='<div class="empty" style="padding:4rem">Aucune entrée de temps enregistrée pour l'instant.</div>';
+    return;
+  }
+  var DOSSIERS_FIN = myDos; // Use real data
+  var myDos=isAdminView()?DOSSIERS_FIN:DOSSIERS_FIN.filter(function(d){return d.avocat_id===currentUser.id;});
   var totH=myDos.reduce((s,d)=>s+d.heuresTotal,0);
   var totAmt=myDos.reduce((s,d)=>s+d.honorairesTotal,0);
   var totFact=myDos.reduce((s,d)=>s+d.facture,0);
@@ -1015,7 +1053,7 @@ function renderFinancier(){
     mainContent=`<div class="card card-accent" style="overflow-x:auto"><div class="chart-title">Rentabilité par dossier</div><table class="rent-table"><thead><tr><th>Dossier</th><th>Client</th>${isAdmin?'<th>Avocat</th>':''}<th class="right">Heures</th><th class="right">Honoraires</th><th class="right">Non facturé</th><th>Rentabilité</th><th>Statut</th></tr></thead><tbody>${tableRows}</tbody></table></div>`;
   } else if(finTab==='avocat'){
     var avRows=(typeof allProfiles!=='undefined'?allProfiles:[]).map(av=>{
-      var avD=DOSSIERS_FIN.filter(d=>d.avocat===av.name);
+      var avD=DOSSIERS_FIN.filter(function(d){return d.avocat_id===av.id;});
       if(!isAdmin&&av.id!==currentUser?.id)return'';
       var avH=avD.reduce((s,d)=>s+d.heuresTotal,0),avAmt=avD.reduce((s,d)=>s+d.honorairesTotal,0),avF=avD.reduce((s,d)=>s+d.facture,0);
       var txH=avH>0?avAmt/avH:0;
@@ -1789,6 +1827,7 @@ function buildExistingClients(){
     }
   } catch(e){}
 })();
+}
 </script>
 </body>
 </html>
