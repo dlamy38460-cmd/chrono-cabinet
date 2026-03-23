@@ -908,7 +908,7 @@ function openEditAvocat(userId){
         + '</select></div>'
     + '</div>'
     + '<div style="display:flex;gap:.6rem;margin-top:1.2rem">'
-      + '<button onclick="saveEditAvocat(\'+userId+\')" style="flex:1;padding:.72rem;background:var(--gold);color:var(--bg);border:none;border-radius:var(--r);font-family:Outfit,sans-serif;font-size:.84rem;font-weight:600;cursor:pointer">Sauvegarder</button>'
+      + '<button data-uid="'+userId+'" onclick="saveEditAvocat(this.getAttribute(\'data-uid\'))" style="flex:1;padding:.72rem;background:var(--gold);color:var(--bg);border:none;border-radius:var(--r);font-size:.84rem;font-weight:600;cursor:pointer">Sauvegarder</button>'
       + '<button onclick="document.getElementById(\'editAvocatOverlay\').remove()" style="padding:.72rem 1.1rem;background:var(--surface2);color:var(--text2);border:1px solid var(--border2);border-radius:var(--r);font-size:.82rem;cursor:pointer">Annuler</button>'
     + '</div>'
     + '</div>';
