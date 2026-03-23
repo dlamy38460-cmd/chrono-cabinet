@@ -1080,56 +1080,91 @@ function renderFinancier(){
 }
 function setFinTab(t,btn){finTab=t;renderFinancier();}
 function renderNotifs(){
-  var myNotifs=isAdmin?NOTIFS:NOTIFS.filter(n=>!n.meta||n.meta.includes((typeof allProfiles!=='undefined'?allProfiles:[]).find(a=>a.id===currentUser?.id)?.name));
-  var filtered=notifFilter==='all'?myNotifs:notifFilter==='unread'?myNotifs.filter(n=>n.unread):myNotifs.filter(n=>n.type===notifFilter);
-  var iconBg={urgent:'ni-urgent',warn:'ni-warn',info:'ni-info',ok:'ni-ok',gold:'ni-gold'};
-  var feed=filtered.map(n=>`<div class="notif-item ${n.unread?'unread':''}">
-    <div class="notif-icon ${iconBg[n.type]||'ni-info'}" style="font-size:1rem">${n.icon}</div>
-    <div class="notif-body">
-      <div class="notif-title">${n.title}</div>
-      <div style="font-size:.8rem;color:var(--text2);margin-top:.15rem;line-height:1.4">${n.body}</div>
-      <div class="notif-meta">${n.meta.map(m=>`<span>${m}</span>`).join('')}</div>
-      <div class="notif-time">${n.time}</div>
-      ${n.action?`<div class="notif-action"><button class="nbtn-sm" onclick="toast('Action : ${n.action}','ok')">${n.action} →</button></div>`:''}
-    </div>
-  </div>`).join('')||'<div class="empty">Aucune notification.</div>';
+  var myNotifs = NOTIFS;
+  var filtered = notifFilter==='all' ? myNotifs
+    : notifFilter==='unread' ? myNotifs.filter(n=>n.unread)
+    : myNotifs.filter(n=>n.type===notifFilter);
+  var unread = myNotifs.filter(n=>n.unread).length;
 
-  // Settings panel
-  var settingsHtml=`<div class="settings-panel">
-    <div class="sp-head">⚙️ Paramètres des alertes</div>
-    <div class="sp-section">
-      <div class="sp-section-title">Échéances judiciaires</div>
-      ${[{l:'Rappel 30 jours avant',s:'30j avant',on:true},{l:'Rappel 7 jours avant',s:'1 sem avant',on:true},{l:'Rappel 48h avant',s:'48h avant',on:true},{l:'Rappel le jour même',s:'Jour J',on:true}].map((t,i)=>`<div class="toggle-row"><div class="toggle-label">${t.l}<div class="toggle-sub">${t.s}</div></div><label class="toggle"><input type="checkbox" ${t.on?'checked':''} onchange="toast('Paramètre mis à jour','ok')"><div class="toggle-track"></div><div class="toggle-knob"></div></label></div>`).join('')}
-    </div>
-    <div class="sp-section">
-      <div class="sp-section-title">Saisie de temps</div>
-      ${[{l:'Rappel si aucune saisie depuis 3 jours',on:true},{l:'Alerte entrée non facturée > 7 jours',on:true},{l:'Résumé hebdomadaire (lundi 8h)',on:false}].map((t,i)=>`<div class="toggle-row"><div class="toggle-label">${t.l}</div><label class="toggle"><input type="checkbox" ${t.on?'checked':''} onchange="toast('Paramètre mis à jour','ok')"><div class="toggle-track"></div><div class="toggle-knob"></div></label></div>`).join('')}
-    </div>
-    <div class="sp-section">
-      <div class="sp-section-title">Canal de livraison</div>
-      ${[{l:'Notification dans l\'app',on:true},{l:'Courriel',on:true},{l:'SMS (Twilio)',on:false}].map((t,i)=>`<div class="toggle-row"><div class="toggle-label">${t.l}</div><label class="toggle"><input type="checkbox" ${t.on?'checked':''} onchange="toast('Canal mis à jour','ok')"><div class="toggle-track"></div><div class="toggle-knob"></div></label></div>`).join('')}
-      <div class="sp-input-row" style="margin-top:.7rem"><div style="font-family:'JetBrains Mono',monospace;font-size:.59rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:.35rem">Numéro SMS</div><input type="text" placeholder="+1 418 555-0000"><div class="sp-hint">Format international requis</div></div>
-      <div class="sp-input-row" style="margin-top:.6rem"><div style="font-family:'JetBrains Mono',monospace;font-size:.59rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:.35rem">Courriel de notification</div><input type="email" placeholder="vaillancourt@lamy-avocats.ca" value="vaillancourt@lamy-avocats.ca"></div>
-    </div>
-    <button class="btn-save-settings" onclick="toast('✓ Paramètres sauvegardés','ok')">Sauvegarder les paramètres</button>
-  </div>`;
+  var bgMap  = {urgent:'rgba(192,57,43,.15)',warn:'rgba(230,126,34,.12)',info:'rgba(41,128,185,.12)',ok:'rgba(74,122,68,.12)'};
+  var bdMap  = {urgent:'rgba(192,57,43,.35)',warn:'rgba(230,126,34,.28)',info:'rgba(41,128,185,.25)',ok:'rgba(74,122,68,.28)'};
+  var clrMap = {urgent:'#e06050',warn:'#d09040',info:'#5090d0',ok:'#6ab864'};
 
-  var unreadCount=myNotifs.filter(n=>n.unread).length;
-  document.getElementById('page-notifications').innerHTML=`
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.6rem">
-      <div class="notif-filters">
-        <div class="nf ${notifFilter==='all'?'active':''}" onclick="setNF('all',this)">Toutes (${myNotifs.length})</div>
-        <div class="nf ${notifFilter==='unread'?'active':''}" onclick="setNF('unread',this)">Non lues (${unreadCount})</div>
-        <div class="nf ${notifFilter==='urgent'?'active':''}" onclick="setNF('urgent',this)">🔴 Urgentes</div>
-        <div class="nf ${notifFilter==='info'?'active':''}" onclick="setNF('info',this)">💡 Info</div>
-        <div class="nf ${notifFilter==='ok'?'active':''}" onclick="setNF('ok',this)">✓ Système</div>
-      </div>
-      <button class="nbtn-sm" onclick="toast('Toutes marquées comme lues','ok')">Tout marquer lu</button>
-    </div>
-    <div class="notif-layout">
-      <div class="notif-feed">${feed}</div>
-      ${settingsHtml}
-    </div>`;
+  var filtersHTML = [
+    {k:'all',   l:'Toutes ('+myNotifs.length+')'},
+    {k:'unread',l:'Non lues ('+unread+')'},
+    {k:'urgent',l:'🔴 Urgentes'},
+    {k:'info',  l:'💡 Info'},
+    {k:'ok',    l:'✓ Système'},
+  ].map(f=>{
+    var active = notifFilter===f.k;
+    return '<div onclick="setNF(''+f.k+'',this)" style="padding:.3rem .75rem;border:1px solid '+(active?'var(--gold)':'var(--border2)')+';border-radius:20px;font-size:.72rem;background:'+(active?'var(--gold-dim)':'var(--surface2)')+';color:'+(active?'var(--gold)':'var(--text3)')+';cursor:pointer;transition:all .2s">'+f.l+'</div>';
+  }).join('');
+
+  var feedHTML = filtered.map(n=>{
+    var bg  = bgMap[n.type]  || 'var(--surface2)';
+    var bd  = bdMap[n.type]  || 'var(--border)';
+    var clr = clrMap[n.type] || 'var(--text2)';
+    var metaHTML = n.meta.map(m=>'<span style="font-family:'JetBrains Mono',monospace;font-size:.64rem;color:var(--text3)">'+m+'</span>').join('<span style="color:var(--text3);margin:0 .2rem">·</span>');
+    var actionHTML = n.action ? '<div style="margin-top:.5rem"><button onclick="toast('Action : '+n.action+'','ok')" style="padding:.28rem .75rem;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);color:var(--text2);font-family:'Outfit',sans-serif;font-size:.73rem;cursor:pointer;transition:all .2s">'+n.action+' →</button></div>' : '';
+    return '<div style="background:'+bg+';border:1px solid '+bd+';border-left:3px solid '+clr+';border-radius:var(--r);padding:.9rem 1.1rem;margin-bottom:.65rem;display:flex;align-items:flex-start;gap:.85rem;position:relative">'
+      + '<div style="width:34px;height:34px;border-radius:50%;background:'+bg+';display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;border:1px solid '+bd+'">'+n.icon+'</div>'
+      + '<div style="flex:1;min-width:0">'
+        + '<div style="font-size:.85rem;font-weight:600;color:var(--text);margin-bottom:.18rem">'+n.title+'</div>'
+        + '<div style="font-size:.79rem;color:var(--text2);line-height:1.5;margin-bottom:.3rem">'+n.body+'</div>'
+        + '<div style="display:flex;flex-wrap:wrap;gap:.3rem;align-items:center;margin-bottom:.18rem">'+metaHTML+'</div>'
+        + '<div style="font-family:'JetBrains Mono',monospace;font-size:.63rem;color:var(--text3)">'+n.time+'</div>'
+        + actionHTML
+      + '</div>'
+      + (n.unread ? '<div style="position:absolute;top:.7rem;right:.7rem;width:7px;height:7px;border-radius:50%;background:var(--gold)"></div>' : '')
+      + '</div>';
+  }).join('') || '<div style="text-align:center;padding:2.5rem;color:var(--text3);font-style:italic;font-size:.84rem">Aucune notification.</div>';
+
+  var toggleRow = function(label, sub, checked) {
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:.42rem 0;border-bottom:1px solid var(--border);gap:.8rem">'
+      + '<div><div style="font-size:.81rem;color:var(--text2)">'+label+'</div>'+(sub?'<div style="font-size:.68rem;color:var(--text3);margin-top:1px">'+sub+'</div>':'')+'</div>'
+      + '<label style="position:relative;width:34px;height:19px;flex-shrink:0;cursor:pointer">'
+        + '<input type="checkbox" '+(checked?'checked':'')+' onchange="toast('Paramètre mis à jour','ok')" style="opacity:0;width:0;height:0;position:absolute">'
+        + '<div style="position:absolute;inset:0;background:'+(checked?'var(--sage)':'var(--surface3)')+';border-radius:9px;border:1px solid '+(checked?'var(--sage)':'var(--border2)')+';transition:background .2s"></div>'
+        + '<div style="position:absolute;top:3px;'+(checked?'left:17px':'left:3px')+';width:11px;height:11px;border-radius:50%;background:'+(checked?'white':'var(--text3)')+';transition:left .2s;pointer-events:none"></div>'
+      + '</label></div>';
+  };
+
+  var settingsHTML = '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">'
+    + '<div style="padding:.85rem 1.2rem;border-bottom:1px solid var(--border);font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:500;color:var(--text)">⚙️ Paramètres des alertes</div>'
+    + '<div style="padding:.75rem 1.2rem;border-bottom:1px solid var(--border)">'
+      + '<div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--text3);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.55rem">Échéances judiciaires</div>'
+      + toggleRow('Rappel 30 jours avant','30j avant',true)
+      + toggleRow('Rappel 7 jours avant','1 sem avant',true)
+      + toggleRow('Rappel 48h avant','48h avant',true)
+      + toggleRow('Rappel le jour même','Jour J',true)
+    + '</div>'
+    + '<div style="padding:.75rem 1.2rem;border-bottom:1px solid var(--border)">'
+      + '<div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--text3);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.55rem">Saisie de temps</div>'
+      + toggleRow('Aucune saisie depuis 3 jours','',true)
+      + toggleRow('Alerte entrée non facturée > 7j','',true)
+      + toggleRow('Résumé hebdomadaire (lundi 8h)','',false)
+    + '</div>'
+    + '<div style="padding:.75rem 1.2rem;border-bottom:1px solid var(--border)">'
+      + '<div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--text3);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.55rem">Canal de livraison</div>'
+      + toggleRow('Notification dans l'app','',true)
+      + toggleRow('Courriel','',true)
+      + toggleRow('SMS (Twilio)','Nécessite configuration',false)
+      + '<div style="margin-top:.6rem"><div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">Courriel de notification</div>'
+      + '<input type="email" placeholder="vous@lamy-avocats.ca" style="border:1px solid var(--border2);border-radius:var(--r);padding:.55rem .8rem;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--text);background:var(--surface2);outline:none;width:100%"></div>'
+    + '</div>'
+    + '<button onclick="toast('✓ Paramètres sauvegardés','ok')" style="display:flex;align-items:center;justify-content:center;padding:.72rem;background:var(--gold);color:var(--bg);border:none;border-radius:var(--r);font-family:'Outfit',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;width:calc(100% - 2.4rem);margin:1rem 1.2rem;transition:all .2s">Sauvegarder les paramètres</button>'
+    + '</div>';
+
+  document.getElementById('page-notifications').innerHTML =
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.6rem">'
+      + '<div style="display:flex;gap:.4rem;flex-wrap:wrap">'+filtersHTML+'</div>'
+      + '<button onclick="toast('Toutes marquées comme lues','ok')" style="padding:.32rem .8rem;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);color:var(--text2);font-family:'Outfit',sans-serif;font-size:.75rem;cursor:pointer">Tout marquer lu</button>'
+    + '</div>'
+    + '<div style="display:grid;grid-template-columns:1fr 300px;gap:1.2rem;align-items:start">'
+      + '<div>'+feedHTML+'</div>'
+      + settingsHTML
+    + '</div>';
 }
 function setNF(f,btn){notifFilter=f;renderNotifs();}
 function renderNotes(){
@@ -1827,6 +1862,8 @@ function buildExistingClients(){
     }
   } catch(e){}
 })();
+}
+}
 </script>
 </body>
 </html>
