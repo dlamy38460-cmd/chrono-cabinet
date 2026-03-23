@@ -1077,6 +1077,7 @@ var _conflitSettings = {
   'saisie-3j': true, 'saisie-fact': true, 'saisie-hebdo': false,
   'notif-app': true, 'notif-email': true, 'notif-sms': false,
   'bloc-eleve': true, 'alerte-email': true, 'verif-obligatoire': true, 'reverif-auto': false,
+  'dossiers-actifs': true, 'dossiers-archives': true, 'associes': true, 'membres-famille': false,
 };
 var _conflitDossierNum = '';
 var _accueilStep = 1;
@@ -1968,14 +1969,24 @@ function renderConflits(){
   var parametresHTML = `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem">
       ${[
-        {title:'Portée de la recherche',items:[['Dossiers actifs','Toujours inclus',true,true],['Dossiers archivés','Recommandé',true,false],['Associés et actionnaires','Ajoute 2–3 sec',true,false],['Membres de la famille','Conjoint·e, enfants',false,false]]},
-        {title:'Obligations et alertes',items:[['Bloquer si conflit élevé','Approbation admin requise',true,false],['Alerte courriel','Avocat + administrateur',true,false],['Vérification obligatoire','Avant toute ouverture',true,false],['Re-vérification auto','Si nouvelle partie ajoutée',false,false]]},
+        {title:'Portée de la recherche',items:[
+          ['Dossiers actifs','Toujours inclus',_conflitSettings['dossiers-actifs'],true,'dossiers-actifs'],
+          ['Dossiers archivés','Recommandé',_conflitSettings['dossiers-archives'],false,'dossiers-archives'],
+          ['Associés et actionnaires','Ajoute 2–3 sec',_conflitSettings['associes'],false,'associes'],
+          ['Membres de la famille','Conjoint·e, enfants',_conflitSettings['membres-famille'],false,'membres-famille']
+        ]},
+        {title:'Obligations et alertes',items:[
+          ['Bloquer si conflit élevé','Approbation admin requise',_conflitSettings['bloc-eleve'],false,'bloc-eleve'],
+          ['Alerte courriel','Avocat + administrateur',_conflitSettings['alerte-email'],false,'alerte-email'],
+          ['Vérification obligatoire','Avant toute ouverture',_conflitSettings['verif-obligatoire'],false,'verif-obligatoire'],
+          ['Re-vérification auto','Si nouvelle partie ajoutée',_conflitSettings['reverif-auto'],false,'reverif-auto']
+        ]},
       ].map(section=>`<div class="card card-accent">
         <div style="font-family:Cormorant Garamond,serif;font-size:1rem;font-weight:500;color:var(--text);margin-bottom:.9rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)">${section.title}</div>
-        ${section.items.map(([l,s,checked,disabled])=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:.48rem 0;gap:.8rem;border-bottom:1px solid var(--border)">
+        ${section.items.map(([l,s,checked,disabled,key])=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:.48rem 0;gap:.8rem;border-bottom:1px solid var(--border)">
           <div style="flex:1"><div style="font-size:.81rem;color:var(--text2)">${l}</div><div style="font-size:.69rem;color:var(--text3);margin-top:2px">${s}</div></div>
           <label style="position:relative;width:34px;height:19px;flex-shrink:0;cursor:${disabled?'not-allowed':'pointer'}">
-            <input type="checkbox" ${checked?'checked':''} ${disabled?'disabled':''} onchange="toast(\'Paramètre mis à jour\',\'ok\')" style="opacity:0;width:0;height:0;position:absolute">
+            <input type="checkbox" ${checked?'checked':''} ${disabled?'disabled':''} onchange="toggleSetting(\''+key+'\')" style="opacity:0;width:0;height:0;position:absolute">
             <div style="position:absolute;inset:0;background:${checked?'var(--sage)':'var(--surface3)'};border-radius:9px;border:1px solid ${checked?'var(--sage)':'var(--border2)'};transition:background .2s"></div>
             <div style="position:absolute;top:3px;left:${checked?'17px':'3px'};width:11px;height:11px;border-radius:50%;background:${checked?'white':'var(--text3)'};transition:left .2s"></div>
           </label>
