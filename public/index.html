@@ -299,6 +299,22 @@ body{transition:background .3s,color .3s}
 .view-toggle:hover{border-color:var(--gold)}
 .view-toggle-label{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase}
 .view-toggle-val{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--gold);font-weight:600}
+
+/* ── MOBILE ────────────────────────────────────────────────────── */
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:.5rem;z-index:1001}
+.hamburger span{width:22px;height:2px;background:var(--gold);border-radius:2px;transition:all .3s;display:block}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:998}
+.sidebar-overlay.visible{display:block}
+
+@media (max-width: 768px) {
+  .hamburger{display:flex}
+  .sidebar{position:fixed;left:-240px;top:0;bottom:0;z-index:999;transition:left .3s ease;box-shadow:none}
+  .sidebar.open{left:0;box-shadow:4px 0 20px rgba(0,0,0,.4)}
+  .main{margin-left:0 !important}
+  .topbar{padding:.6rem 1rem}
+  .content{padding:1rem}
+  .page{padding:.8rem}
+}
 </style>
 </head>
 <body>
@@ -335,6 +351,7 @@ body{transition:background .3s,color .3s}
 
 <!-- APP -->
 <div id="appScreen">
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 <div class="app">
   <aside class="sidebar">
     <div class="sidebar-logo">
@@ -373,6 +390,7 @@ body{transition:background .3s,color .3s}
 
   <div class="content">
     <div class="topbar">
+      <div class="hamburger" onclick="toggleSidebar()" id="hamburgerBtn"><span></span><span></span><span></span></div>
       <div><div class="topbar-title" id="pageTitle">Tableau de bord</div><div class="topbar-sub" id="pageDate"></div></div>
       <div id="adminBadgeWrap"></div>
         <div class="theme-toggle" onclick="toggleTheme()" title="Changer le thème">
@@ -2062,6 +2080,30 @@ function buildExistingClients(){
       var tl=document.getElementById('themeLabel');if(tl)tl.textContent='☀️ Clair';
     }
   } catch(e){}
-})();</script>
+})();
+// ── MOBILE SIDEBAR ───────────────────────────────────────────────
+function toggleSidebar() {
+  var sidebar = document.querySelector('.sidebar');
+  var overlay = document.getElementById('sidebarOverlay');
+  if (!sidebar) return;
+  var isOpen = sidebar.classList.contains('open');
+  if (isOpen) { closeSidebar(); } else {
+    sidebar.classList.add('open');
+    if (overlay) overlay.classList.add('visible');
+  }
+}
+function closeSidebar() {
+  var sidebar = document.querySelector('.sidebar');
+  var overlay = document.getElementById('sidebarOverlay');
+  if (sidebar) sidebar.classList.remove('open');
+  if (overlay) overlay.classList.remove('visible');
+}
+// Close sidebar on nav item click (mobile)
+document.addEventListener('click', function(e) {
+  if (e.target.closest && e.target.closest('.nav-item')) {
+    if (window.innerWidth <= 768) closeSidebar();
+  }
+});
+</script>
 </body>
 </html>
